@@ -1,0 +1,125 @@
+Note 55 0 0 2000 0
+Note 57 2000 2000 3000 0
+Note 59 3000 3000 6000 0
+Note 60 6000 6000 9000 0
+Note 59 9000 9000 12000 0
+Note 59 0 0 2000 1
+Note 62 0 0 2000 2
+Note 74 0 0 1000 3
+Note 67 1000 1000 1500 3
+Note 69 1500 1500 2000 3
+Note 71 2000 2000 2500 3
+Note 72 2500 2500 3000 3
+Note 74 3000 3000 4000 3
+Note 67 4000 4000 5000 3
+Note 67 5000 5000 6000 3
+Note 76 6000 6000 7000 3
+Note 72 7000 7000 7500 3
+Note 74 7500 7500 8000 3
+Note 76 8000 8000 8500 3
+Note 77 8500 8500 9000 3
+Note 79 9000 9000 10000 3
+Note 67 10000 10000 11000 3
+Note 67 11000 11000 12000 3
+Tatum 0
+Tatum 125
+Tatum 250
+Tatum 375
+Tatum 500
+Tatum 625
+Tatum 750
+Tatum 875
+Tatum 1000
+Tatum 1125
+Tatum 1250
+Tatum 1375
+Tatum 1500
+Tatum 1625
+Tatum 1750
+Tatum 1875
+Tatum 2000
+Tatum 2125
+Tatum 2250
+Tatum 2375
+Tatum 2500
+Tatum 2625
+Tatum 2750
+Tatum 2875
+Tatum 3000
+Tatum 3125
+Tatum 3250
+Tatum 3375
+Tatum 3500
+Tatum 3625
+Tatum 3750
+Tatum 3875
+Tatum 4000
+Tatum 4125
+Tatum 4250
+Tatum 4375
+Tatum 4500
+Tatum 4625
+Tatum 4750
+Tatum 4875
+Tatum 5000
+Tatum 5125
+Tatum 5250
+Tatum 5375
+Tatum 5500
+Tatum 5625
+Tatum 5750
+Tatum 5875
+Tatum 6000
+Tatum 6125
+Tatum 6250
+Tatum 6375
+Tatum 6500
+Tatum 6625
+Tatum 6750
+Tatum 6875
+Tatum 7000
+Tatum 7125
+Tatum 7250
+Tatum 7375
+Tatum 7500
+Tatum 7625
+Tatum 7750
+Tatum 7875
+Tatum 8000
+Tatum 8125
+Tatum 8250
+Tatum 8375
+Tatum 8500
+Tatum 8625
+Tatum 8750
+Tatum 8875
+Tatum 9000
+Tatum 9125
+Tatum 9250
+Tatum 9375
+Tatum 9500
+Tatum 9625
+Tatum 9750
+Tatum 9875
+Tatum 10000
+Tatum 10125
+Tatum 10250
+Tatum 10375
+Tatum 10500
+Tatum 10625
+Tatum 10750
+Tatum 10875
+Tatum 11000
+Tatum 11125
+Tatum 11250
+Tatum 11375
+Tatum 11500
+Tatum 11625
+Tatum 11750
+Tatum 11875
+Tatum 12000
+Hierarchy 3,2 4 a=0
+Key 7 Maj
+Chord 0 GMaj
+Chord 6000 CMaj
+Chord 9000 GMaj

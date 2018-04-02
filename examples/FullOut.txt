@@ -1,0 +1,15 @@
+Transcription1.txt
+Multi-pitch: 0.9302325581395349
+Voice: 0.8125
+Meter: 0.7368421052631577
+Value: 0.9642857142857143
+Harmony: 1.0
+MV2H: 0.8887720755376813
+
+Transcription2.txt
+Multi-pitch: 0.7727272727272727
+Voice: 1.0
+Meter: 1.0
+Value: 1.0
+Harmony: 0.5
+MV2H: 0.8545454545454545
