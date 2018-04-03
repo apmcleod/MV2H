@@ -16,6 +16,8 @@ ARGS:
  * `-F` = Perform a full meta-evaluation from standard in, where standard in may contain many results created by using -E.
 
 ### Examples
+The examples directory contains two example transcriptions of an ground truth. To perform evaluation, run the following commands and you should get the results shown:
+
  * `$ java -cp bin -E examples/GroundTruth.txt <examples/Transcription1.txt`  
 Multi-pitch: 0.9302325581395349  
 Voice: 0.8125  
@@ -40,9 +42,6 @@ Value: mean=0.9821428571428572 stdev=0.017857142857137718
 Harmony: mean=0.75 stdev=0.25  
 MV2H: mean=0.8716587650415679 stdev=0.017113310496113164  
 
-### Troubleshooting
-Most Exceptions that occur while running this program should print a useful error message out to
-stderr.
 
 ## File Format
 The file format for reading a ground truth or transcription is text-based, and each line can be one of the following, and ordering of the lines does not matter:
