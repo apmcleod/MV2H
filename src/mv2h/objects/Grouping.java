@@ -1,7 +1,7 @@
 package mv2h.objects;
 
 public class Grouping {
-	private static final int GROUPING_EPSILON = 70;
+	private static final int GROUPING_EPSILON = 50;
 	
 	private final int startTime;
 	private final int endTime;

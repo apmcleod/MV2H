@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Note implements Comparable<Note> {
 	private static final int ONSET_DELTA = 50;
-	private static final int DURATION_DELTA = 70;
+	private static final int DURATION_DELTA = 100;
 	
 	public final int pitch;
 	public final int onsetTime;
