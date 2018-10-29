@@ -1,5 +1,17 @@
 # MV2H
 
+This is the code and data from my 2018 ISMIR paper. If you use it, please cite it:
+
+```
+@inproceedings{McLeod:18a,
+  title={Evaluating automatic polyphonic music transcription},
+  author={McLeod, Andrew and Steedman, Mark},
+  booktitle={{ISMIR}},
+  year={2018},
+  pages={42--49}
+}
+```
+
 ## Project Overview
 The goal of this project is to create an automatic, joint, quantitative metric for complete transcription of polyphonic music.
 
