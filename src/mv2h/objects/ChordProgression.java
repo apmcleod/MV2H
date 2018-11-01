@@ -21,6 +21,10 @@ public class ChordProgression {
 	}
 	
 	public double getScore(ChordProgression groundTruth, int lastTime) {
+		if (groundTruth.chords.isEmpty()) {
+			return Double.NaN;
+		}
+		
 		List<Chord> transcriptionChords = getChords();
 		List<Chord> groundTruthChords = groundTruth.getChords();
 		

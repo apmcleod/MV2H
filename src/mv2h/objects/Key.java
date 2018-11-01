@@ -2,13 +2,21 @@ package mv2h.objects;
 
 import java.io.IOException;
 
-public class Key {
+public class Key implements Comparable<Key> {
 	public final int tonic;
 	public final boolean isMajor;
+	public final int time;
+	
+	public Key(int tonic, boolean isMajor, int startTime) {
+		this.tonic = tonic;
+		this.isMajor = isMajor;
+		this.time = startTime;
+	}
 	
 	public Key(int tonic, boolean isMajor) {
 		this.tonic = tonic;
 		this.isMajor = isMajor;
+		time = 0;
 	}
 	
 	public double getScore(Key groundTruth) {
@@ -19,6 +27,11 @@ public class Key {
 		
 		// Perfect fifth higher
 		if (isMajor == groundTruth.isMajor && tonic == (groundTruth.tonic + 7) % 12) {
+			return 0.5;
+		}
+		
+		// Perfect fifth lower
+		if (isMajor == groundTruth.isMajor && tonic == (groundTruth.tonic + 5) % 12) {
 			return 0.5;
 		}
 		
@@ -40,14 +53,29 @@ public class Key {
 		return 0.0;
 	}
 	
+	@Override
+	public int compareTo(Key o) {
+		int result = Integer.compare(time, o.time);
+		if (result != 0) {
+			return result;
+		}
+		
+		result = Integer.compare(tonic, o.tonic);
+		if (result != 0) {
+			return result;
+		}
+		
+		return Boolean.compare(isMajor, o.isMajor);
+	}
+	
 	public String toString() {
-		return "Key " + tonic + " " + (isMajor ? "Maj" : "min");
+		return "Key " + tonic + " " + (isMajor ? "Maj" : "min") + " " + time;
 	}
 
 	public static Key parseKey(String line) throws IOException {
 		String[] keySplit = line.split(" ");
 		
-		if (keySplit.length != 3) {
+		if (keySplit.length < 3) {
 			throw new IOException("Error parsing Key: " + line);
 		}
 		
@@ -67,6 +95,15 @@ public class Key {
 			throw new IOException("Error parsing Key. Major/minor not recognised: " + line);
 		}
 		
-		return new Key(tonic, isMajor);
+		int time = 0;
+		if (keySplit.length >= 4) {
+			try {
+				time = Integer.parseInt(keySplit[3]);
+			} catch (NumberFormatException e) {
+				throw new IOException("Error parsing Key. Start time not recognised: " + line);
+			}
+		}
+		
+		return new Key(tonic, isMajor, time);
 	}
 }

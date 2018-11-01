@@ -16,18 +16,18 @@ public class Music {
 	private final List<Note> notes;
 	private final List<Voice> voices;
 	private final Meter meter;
-	private final Key key;
-	private final ChordProgression progression;
+	private final KeyProgression keyProgression;
+	private final ChordProgression chordProgression;
 	
 	private final int lastTime;
 
-	public Music(List<Note> notes, List<Voice> voices, Meter meter, Key key, ChordProgression progression,
+	public Music(List<Note> notes, List<Voice> voices, Meter meter, KeyProgression keyProgression, ChordProgression progression,
 			int lastTime) {
 		this.notes = notes;
 		this.voices = voices;
 		this.meter = meter;
-		this.key = key;
-		this.progression = progression;
+		this.keyProgression = keyProgression;
+		this.chordProgression = progression;
 		this.lastTime = lastTime;
 	}
 	
@@ -163,14 +163,19 @@ public class Music {
 			valueScoreSum += transcriptionNote.getValueScore(groundTruthNoteMapping.get(transcriptionNote));
 		}
 		double valueScore = valueScoreSum / valueCheckNotes.size();
+		if (Double.isNaN(valueScore)) {
+			valueScore = 0.0;
+		}
 		
 		
 		// Harmony
-		double keyScore = transcription.key.getScore(key);
-		double progressionScore = transcription.progression.getScore(progression, lastTime);
+		double keyScore = transcription.keyProgression.getScore(keyProgression, lastTime);
+		double progressionScore = transcription.chordProgression.getScore(chordProgression, lastTime);
 		
 		double harmonyScore = (keyScore + progressionScore) / 2;
-		
+		if (Double.isNaN(progressionScore)) {
+			harmonyScore = keyScore;
+		}
 		
 		// MV2H
 		double mv2h = (multiPitchF1 + voiceF1 + meterF1 + valueScore + harmonyScore) / 5;
@@ -192,8 +197,8 @@ public class Music {
 		List<Note> notes = new ArrayList<Note>();
 		List<Voice> voices = new ArrayList<Voice>();
 		Meter meter = new Meter();
-		ChordProgression progression = new ChordProgression();
-		Key key = null;
+		ChordProgression chordProgression = new ChordProgression();
+		KeyProgression keyProgression = new KeyProgression();
 		int lastTime = Integer.MIN_VALUE;
 		
 		while (input.hasNextLine()) {
@@ -219,7 +224,7 @@ public class Music {
 				
 			} else if (line.startsWith("Chord")) {
 				Chord chord = Chord.parseChord(line);
-				progression.addChord(chord);
+				chordProgression.addChord(chord);
 				
 				lastTime = Math.max(lastTime, chord.time);
 
@@ -228,12 +233,15 @@ public class Music {
 				meter.setHierarchy(hierarchy);
 
 			} else if (line.startsWith("Key")) {
-				key = Key.parseKey(line);
+				Key key = Key.parseKey(line);
+				keyProgression.addKey(key);
+				
+				lastTime = Math.max(lastTime, key.time);
 			}
 		}
 		input.close();
 		
-		return new Music(notes, voices, meter, key, progression, lastTime);
+		return new Music(notes, voices, meter, keyProgression, chordProgression, lastTime);
 	}
 
 }

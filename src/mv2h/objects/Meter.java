@@ -14,6 +14,7 @@ public class Meter {
 	
 	public Meter() {
 		tatums = new TreeSet<Tatum>();
+		hierarchy = new Hierarchy(4, 2, 4, 0);
 	}
 	
 	public void addTatum(Tatum tatum) {

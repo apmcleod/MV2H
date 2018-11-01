@@ -38,7 +38,7 @@ public class Note implements Comparable<Note> {
 	}
 	
 	public String toString() {
-		return "Note " + pitch + " " + onsetTime + " " + valueOffsetTime + " " + voice;
+		return "Note " + pitch + " " + onsetTime + " " + valueOnsetTime + " " + valueOffsetTime + " " + voice;
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class Note implements Comparable<Note> {
 		String[] noteSplit = line.split(" ");
 		
 		if (noteSplit.length != 6) {
-			throw new IOException("Error parsing Note: " + line);
+			throw new IOException("Error parsing Note. Note enough fields: " + line);
 		}
 		
 		int pitch;
