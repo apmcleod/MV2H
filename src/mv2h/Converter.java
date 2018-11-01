@@ -74,11 +74,10 @@ public class Converter {
 					
 					int tatumsPerSubBeat = ticksPerQuarterNote / subBeatsPerQuarterNote;
 					
-					Hierarchy newHierarchy = new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, tick);
+					Hierarchy newHierarchy = new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, hierarchy == null ? tick : 0);
 					if (hierarchy != null && (hierarchy.beatsPerBar != newHierarchy.beatsPerBar ||
 							hierarchy.subBeatsPerBeat != newHierarchy.subBeatsPerBeat ||
-							hierarchy.tatumsPerSubBeat != newHierarchy.tatumsPerSubBeat ||
-							hierarchy.anacrusisLengthTatums % hierarchy.tatumsPerSubBeat != newHierarchy.anacrusisLengthTatums % newHierarchy.tatumsPerSubBeat)) {
+							hierarchy.tatumsPerSubBeat != newHierarchy.tatumsPerSubBeat)) {
 						System.err.println("WARNING: Meter change detected (" + hierarchy + " to " + newHierarchy + ") on line " + lineNum + ": " + line);
 					} else {
 						hierarchy = newHierarchy;
