@@ -21,8 +21,45 @@ public class Aligner {
 	}
 
 	public static Set<List<Integer>> getPossibleAlignments(Music gt, Music m) {
-		List<List<Set<List<Integer>>>> alignments = getAlignments(gt.getNoteLists(), m.getNoteLists());
-		return alignments.get(alignments.size() - 1).get(alignments.get(alignments.size() - 1).size() - 1);
+		double[][] distances = getAlignmentMatrix(gt.getNoteLists(), m.getNoteLists());
+		return getPossibleAlignmentsFromMatrix(distances.length - 1, distances[0].length - 1, distances);
+	}
+	
+	private static Set<List<Integer>> getPossibleAlignmentsFromMatrix(int i, int j, double[][] distances) {
+		Set<List<Integer>> alignments = new HashSet<List<Integer>>();
+		
+		if (i == 1 && j == 1) {
+			alignments.add(new ArrayList<Integer>());
+			return alignments;
+		}
+		
+		double min = Math.min(Math.min(
+				distances[i - 1][j],
+				distances[i][j - 1]),
+				distances[i - 1][j - 1]);
+		
+		if (distances[i - 1][j] == min) {
+			for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j, distances)) {
+				list.add(-1);
+				alignments.add(list);
+			}
+		}
+		
+		if (distances[i][j - 1] == min) {
+			for (List<Integer> list : getPossibleAlignmentsFromMatrix(i, j - 1, distances)) {
+				//list.add(-1);
+				alignments.add(list);
+			}
+		}
+		
+		if (distances[i - 1][j - 1] == min) {
+			for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j - 1, distances)) {
+				list.add(j - 2);
+				alignments.add(list);
+			}
+		}
+		
+		return alignments;
 	}
 	
 	/**
@@ -32,13 +69,8 @@ public class Aligner {
 	 * @param mNotes The transcribed note lists.
 	 * @return The DTW distance matrix.
 	 */
-	private static List<List<Set<List<Integer>>>> getAlignments(List<List<Note>> gtNotes, List<List<Note>> mNotes) {
+	private static double[][] getAlignmentMatrix(List<List<Note>> gtNotes, List<List<Note>> mNotes) {
 		double[][] distances = new double[gtNotes.size() + 1][mNotes.size() + 1];
-		
-		List<List<Set<List<Integer>>>> alignments = new ArrayList<List<Set<List<Integer>>>>();
-		alignments.add(new ArrayList<Set<List<Integer>>>());
-		alignments.get(0).add(new HashSet<List<Integer>>());
-		alignments.get(0).get(0).add(new ArrayList<Integer>());
 		
 		for (int i = 1; i < distances.length; i++) {
 			distances[i][0] = Double.POSITIVE_INFINITY;
@@ -50,13 +82,6 @@ public class Aligner {
 		
 		for (int j = 1; j < distances[0].length; j++) {
 			for (int i = 1; i < distances.length; i++) {
-				while (alignments.size() <= i) {
-					alignments.add(new ArrayList<Set<List<Integer>>>());
-				}
-				while (alignments.get(i).size() <= j) {
-					alignments.get(i).add(new HashSet<List<Integer>>());
-				}
-				
 				double distance = getDistance(gtNotes.get(i - 1), mNotes.get(j - 1));
 				
 				double min = Math.min(Math.min(
@@ -65,33 +90,13 @@ public class Aligner {
 						distances[i - 1][j - 1]);
 				distances[i][j] = min + distance;
 				
-				if (distances[i - 1][j - 1] == min) {
-					if (i == 1) {
-						alignments.get(i).get(j).addAll(alignments.get(i - 1).get(j - 1));
-					} else {
-						for (List<Integer> oldList : alignments.get(i - 1).get(j - 1)) {
-							List<Integer> list = new ArrayList<Integer>(oldList);
-							list.add(j - 2);
-							alignments.get(i).get(j).add(list);
-						}
-					}
-				} else {
-					if (distances[i - 1][j] == min) {
-						for (List<Integer> oldList : alignments.get(i - 1).get(j)) {
-							List<Integer> list = new ArrayList<Integer>(oldList);
-							list.add(-1);
-							alignments.get(i).get(j).add(list);
-						}
-					}
-					
-					if (distances[i][j - 1] == min) {
-						alignments.get(i).get(j).addAll(alignments.get(i).get(j - 1));
-					}
+				if (distances[i - 1][j - 1] != min) {
+					distances[i][j] += 0.01;
 				}
 			}
 		}
 		
-		return alignments;
+		return distances;
 	}
 	
 	/**
