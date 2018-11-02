@@ -1,4 +1,4 @@
-package mv2h.objects;
+package mv2h.objects.meter;
 
 import java.util.ArrayList;
 import java.util.Iterator;

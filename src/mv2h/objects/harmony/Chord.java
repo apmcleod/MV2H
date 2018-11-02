@@ -1,4 +1,4 @@
-package mv2h.objects;
+package mv2h.objects.harmony;
 
 import java.io.IOException;
 
@@ -6,7 +6,7 @@ public class Chord implements Comparable<Chord> {
 	public final int time;
 	public final String chord;
 	
-	public Chord(int time, String chord) {
+	public Chord(String chord, int time) {
 		this.time = time;
 		this.chord = chord;
 	}
@@ -50,6 +50,6 @@ public class Chord implements Comparable<Chord> {
 		
 		String chord = chordSplit[2];
 		
-		return new Chord(time, chord);
+		return new Chord(chord, time);
 	}
 }

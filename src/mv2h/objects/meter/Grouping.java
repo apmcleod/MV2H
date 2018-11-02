@@ -1,4 +1,4 @@
-package mv2h.objects;
+package mv2h.objects.meter;
 
 public class Grouping {
 	private static final int GROUPING_EPSILON = 50;

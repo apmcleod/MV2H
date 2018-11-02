@@ -1,4 +1,4 @@
-package mv2h.objects;
+package mv2h.objects.harmony;
 
 import java.util.ArrayList;
 import java.util.HashMap;

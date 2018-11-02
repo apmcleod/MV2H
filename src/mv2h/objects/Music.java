@@ -10,6 +10,14 @@ import java.util.Map;
 import java.util.Scanner;
 
 import mv2h.Main;
+import mv2h.objects.harmony.Chord;
+import mv2h.objects.harmony.ChordProgression;
+import mv2h.objects.harmony.Key;
+import mv2h.objects.harmony.KeyProgression;
+import mv2h.objects.meter.Hierarchy;
+import mv2h.objects.meter.Meter;
+import mv2h.objects.meter.Tatum;
+import mv2h.tools.Aligner;
 
 public class Music {
 	
@@ -24,6 +32,8 @@ public class Music {
 	public Music(List<Note> notes, List<Voice> voices, Meter meter, KeyProgression keyProgression, ChordProgression progression,
 			int lastTime) {
 		this.notes = notes;
+		Collections.sort(notes);
+		
 		this.voices = voices;
 		this.meter = meter;
 		this.keyProgression = keyProgression;
@@ -31,7 +41,51 @@ public class Music {
 		this.lastTime = lastTime;
 	}
 	
-	public String evaluateTranscription(Music transcription) {
+	public List<List<Note>> getNoteLists() {
+		List<List<Note>> lists = new ArrayList<List<Note>>();
+		if (notes.isEmpty()) {
+			return lists;
+		}
+		
+		List<Note> mostRecentList = new ArrayList<Note>();
+		int mostRecentValueOnsetTime = notes.get(0).valueOnsetTime;
+		lists.add(mostRecentList);
+		mostRecentList.add(notes.get(0));
+		
+		for (int i = 1; i < notes.size(); i++) {
+			Note note = notes.get(i);
+			
+			if (mostRecentValueOnsetTime == note.valueOnsetTime) {
+				mostRecentList.add(note);
+				
+			} else {
+				mostRecentList = new ArrayList<Note>();
+				mostRecentValueOnsetTime = note.valueOnsetTime;
+				lists.add(mostRecentList);
+				mostRecentList.add(note);
+			}
+		}
+		
+		return lists;
+	}
+	
+	public MV2H evaluateTranscription(Music transcription) {
+		MV2H best = new MV2H(0, 0, 0, 0, 0);
+		
+		for (List<Integer> alignment : Aligner.getPossibleAlignments(this, transcription)) {
+			MV2H candidate = evaluateTranscription(transcription, alignment);
+			
+			if (candidate.compareTo(best) > 0) {
+				best = candidate;
+			}
+		}
+		
+		return best;
+	}
+		
+	public MV2H evaluateTranscription(Music transcription, List<Integer> alignment) {
+		transcription = transcription.align(this, alignment);
+		
 		// Tracking objects
 		List<Note> transcriptionNotes = new ArrayList<Note>(transcription.notes);
 		List<Note> groundTruthNotes = new ArrayList<Note>(notes);
@@ -178,19 +232,52 @@ public class Music {
 		}
 		
 		// MV2H
-		double mv2h = (multiPitchF1 + voiceF1 + meterF1 + valueScore + harmonyScore) / 5;
+		return new MV2H(multiPitchF1, voiceF1, meterF1, valueScore, harmonyScore);
+	}
+
+	/**
+	 * Get a new Music object whose times are mapped to the corresponding ground truth's
+	 * times given the alignment.
+	 * 
+	 * @param gt The ground truth Music object.
+	 * @param alignment The alignment to re-map with.
+	 * 
+	 * @return A new Music object with the given alignment.
+	 */
+	private Music align(Music gt, List<Integer> alignment) {
+		List<Note> newNotes = new ArrayList<Note>(notes.size());
+		List<Voice> newVoices = new ArrayList<Voice>(voices.size());
+		for (Note note : notes) {
+			newNotes.add(new Note(
+					note.pitch,
+					Aligner.convertTime(note.onsetTime, gt, this, alignment),
+					Aligner.convertTime(note.valueOnsetTime, gt, this, alignment),
+					Aligner.convertTime(note.valueOffsetTime, gt, this, alignment),
+					note.voice));
+			
+			while (note.voice >= newVoices.size()) {
+				newVoices.add(new Voice());
+			}
+			newVoices.get(note.voice).addNote(newNotes.get(newNotes.size() - 1));
+		}
 		
+		Meter newMeter = new Meter();
+		newMeter.setHierarchy(meter.getHierarchy());
+		for (Tatum tatum : meter.getTatums()) {
+			newMeter.addTatum(new Tatum(Aligner.convertTime(tatum.time, gt, this, alignment)));
+		}
 		
-		// Create return string
-		StringBuilder sb = new StringBuilder();
-		sb.append("Multi-pitch: " + multiPitchF1 + "\n");
-		sb.append("Voice: " + voiceF1 + "\n");
-		sb.append("Meter: " + meterF1 + "\n");
-		sb.append("Value: " + valueScore + "\n");
-		sb.append("Harmony: " + harmonyScore + "\n");
-		sb.append("MV2H: " + mv2h);
+		KeyProgression newKeyProgression = new KeyProgression();
+		for (Key key : keyProgression.getKeys()) {
+			newKeyProgression.addKey(new Key(key.tonic, key.isMajor, Aligner.convertTime(key.time, gt, this, alignment)));
+		}
 		
-		return sb.toString();
+		ChordProgression newChordProgression = new ChordProgression();
+		for (Chord chord : chordProgression.getChords()) {
+			newChordProgression.addChord(new Chord(chord.chord, Aligner.convertTime(chord.time, gt, this, alignment)));
+		}
+		
+		return new Music(newNotes, newVoices, newMeter, newKeyProgression, newChordProgression, Aligner.convertTime(lastTime, gt, this, alignment));
 	}
 
 	public static Music parseMusic(Scanner input) throws IOException {

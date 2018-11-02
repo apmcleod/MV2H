@@ -43,12 +43,7 @@ public class Note implements Comparable<Note> {
 
 	@Override
 	public int compareTo(Note o) {
-		int result = Integer.compare(onsetTime, o.onsetTime);
-		if (result != 0) {
-			return result;
-		}
-		
-		result = Integer.compare(voice, o.voice);
+		int result = Integer.compare(valueOnsetTime, o.valueOnsetTime);
 		if (result != 0) {
 			return result;
 		}
@@ -58,7 +53,12 @@ public class Note implements Comparable<Note> {
 			return result;
 		}
 		
-		result = Integer.compare(valueOnsetTime, o.valueOnsetTime);
+		result = Integer.compare(onsetTime, o.onsetTime);
+		if (result != 0) {
+			return result;
+		}
+		
+		result = Integer.compare(voice, o.voice);
 		if (result != 0) {
 			return result;
 		}

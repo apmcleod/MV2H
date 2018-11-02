@@ -1,4 +1,4 @@
-package mv2h;
+package mv2h.tools;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
-import mv2h.objects.Hierarchy;
-import mv2h.objects.Key;
 import mv2h.objects.Note;
-import mv2h.objects.Tatum;
+import mv2h.objects.harmony.Key;
+import mv2h.objects.meter.Hierarchy;
+import mv2h.objects.meter.Tatum;
 
 public class Converter {
 	
@@ -30,6 +30,7 @@ public class Converter {
 	public Converter(InputStream stream) {
 		Scanner in = new Scanner(stream);
 		int lineNum = 0;
+		int ticksPerQuarterNote = 4;
 		
 		while (in.hasNextLine()) {
 			lineNum++;
@@ -54,7 +55,7 @@ public class Converter {
 			
 			switch (attributes[5]) {
 				case "attributes":
-					int ticksPerQuarterNote = Integer.parseInt(attributes[6]);
+					ticksPerQuarterNote = Integer.parseInt(attributes[6]);
 					
 					// Time signature
 					int tsNumerator = Integer.parseInt(attributes[9]);
@@ -150,6 +151,34 @@ public class Converter {
 							default:
 								System.err.println("WARNING: Unknown tie type " + tieInfo + ". Skipping line " + lineNum + ": " + line);
 								break;
+						}
+					}
+					break;
+					
+				case "tremolo-m":
+					duration = Integer.parseInt(attributes[6]);
+					lastTick = Math.max(tick + duration, lastTick);
+					
+					numNotes = Integer.parseInt(attributes[8]);
+					
+					pitches = new int[numNotes];
+					for (int i = 0; i < numNotes; i++) {
+						try {
+							pitches[i] = getPitchFromString(attributes[9 + i]);
+						} catch (IOException e) {
+							System.err.println("WARNING: " + e.getMessage() + " Skipping line " + lineNum + ": " + line);
+							continue;
+						}
+					}
+					
+					for (int pitch : pitches) {
+						// TODO: Decide how many notes to add here. i.e., default to eighth notes for now?
+						int ticksPerTremolo = ticksPerQuarterNote / 2;
+						int numTremolos = duration / ticksPerTremolo;
+						
+						
+						for (int i = 0; i < numTremolos; i++) {
+							notes.add(new Note(pitch, getTimeFromTick(tick + ticksPerTremolo * i), getTimeFromTick(tick + ticksPerTremolo * i), getTimeFromTick(tick + ticksPerTremolo * (i + 1)), voice));
 						}
 					}
 					break;
