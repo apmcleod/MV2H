@@ -1,13 +1,9 @@
 package mv2h.tools;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
 import mv2h.Main;
@@ -15,11 +11,6 @@ import mv2h.objects.Music;
 import mv2h.objects.Note;
 
 public class Aligner {
-	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		System.out.println(getPossibleAlignments(Music.parseMusic(new Scanner(new File(args[0]))), Music.parseMusic(new Scanner(new File(args[1])))));
-	}
-
 	public static Set<List<Integer>> getPossibleAlignments(Music gt, Music m) {
 		double[][] distances = getAlignmentMatrix(gt.getNoteLists(), m.getNoteLists());
 		return getPossibleAlignmentsFromMatrix(distances.length - 1, distances[0].length - 1, distances);
