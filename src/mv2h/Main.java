@@ -29,7 +29,7 @@ public class Main {
 						// Check Full
 						case 'F':
 							checkFull();
-							break;
+							return;
 						
 						// Evaluate!
 						case 'g':
