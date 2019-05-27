@@ -18,7 +18,7 @@ Note that while the paper and the code on the master branch only works on time-a
 The goal of this project is to create an automatic, joint, quantitative metric for complete transcription of polyphonic music. This branch includes code to evaluate a non-aligned score and ground truth.
 
 ### Using with Non-aligned Data
-The program will automatically perform alignment itself. For the time information in the input text files, you may use any tempo, provided all of the given times are correct relative to each other. The aligned metric checks only for exact timing matches, rather than using a (for example) 50ms window.
+The program will perform alignment itself if used with the `-a` flag. Note that this sets the time window for onset, offset, and groupings to 0ms (since they should be aligned). For the time information in the input text files (particularly the ground truth), you should use some reasonable tempo, like 100 BMP.
 
 For details on using scoring MusicXML files with metric, see the MusicXML section below.
 
@@ -34,6 +34,7 @@ Run the program one of the following ways:
 ARGS:
  * `-g FILE` = Use the given FILE as ground truth.
  * `-t FILE` = Use the given FILE as the transcription.
+ * `-a` = Perform alignment between the ground truth and the transcription.
  * `-F` = Combine many evaluations from standard in, where standard in contains many outputs created by using -g and -t.
 
 ### Examples
@@ -84,3 +85,6 @@ This is a string representing the key signature, where tonic is an integer betwe
 Representing a chord, where time is the start time of the chord, in milliseconds, and chord is any string representing the chord.
 
 ## MusicXML
+* First, use the included C++ converter with `MusicXMLParser/MusicXMLToFmt1x in.xml out.txt` to convert a MusicXML file into a text-based format.
+* Next, use `java -cp bin mv2h.tools.Converter <out.txt >converted.txt` to convert that text format into the text format used by mv2h (reads and writes with std in and out). The tempo defaults to 500 ms per MusicXML beat.
+* Use the standard mv2h as above with the `-a` flag.
