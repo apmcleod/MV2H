@@ -213,6 +213,6 @@ public class Aligner {
 	private static int convertTime(int time, int gtPreviousTime, int gtNextTime, int mPreviousTime, int mNextTime) {
 		double rate = ((double) (gtNextTime - gtPreviousTime)) / (mNextTime - mPreviousTime);
 		
-		return (int) Math.round(rate * (time - mPreviousTime) + mPreviousTime);
+		return (int) Math.round(rate * (time - mPreviousTime) + gtPreviousTime);
 	}
 }

@@ -212,7 +212,7 @@ public class Converter {
 	}
 	
 	private int getTimeFromTick(int tick) {
-		return (int) Math.round(((double) tick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * 500);
+		return (int) Math.round(((double) tick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * 250);
 	}
 	
 	public List<Tatum> getTatums() {
