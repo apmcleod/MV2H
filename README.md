@@ -15,7 +15,12 @@ This is the code and data from my 2018 ISMIR paper. If you use it, please cite i
 Note that while the paper and the code on the master branch only works on time-aligned input and ground truth pairs, the code in the regress branch uses Dynamic Time Warping to automatically align non-aligned input and ground truth. For now, please still cite the original publication if you use this new version.
 
 ## Project Overview
-The goal of this project is to create an automatic, joint, quantitative metric for complete transcription of polyphonic music.
+The goal of this project is to create an automatic, joint, quantitative metric for complete transcription of polyphonic music. This branch includes code to evaluate a non-aligned score and ground truth.
+
+### Using with Non-aligned Data
+When using non-aligned data, include the flag `-a` (for align) to tell the program it will need to perform alignment itself. For the time information in the input text files, you may use any tempo, provided all of the given times are correct relative to each other. The aligned metric checks only for exact timing matches, rather than using a (for example) 50ms window.
+
+For details on using scoring MusicXML files with metric, see the MusicXML section below.
 
 ## Installing
 The java files can all be compiled into class files in a bin directory using the Makefile
@@ -70,8 +75,10 @@ This represents a tatum pulse at the given time (an integer, in milliseconds).
  * `Hierarchy bpb,sbpb tpsb a=al`  
 This represents the metrical hierarchy, where bpb, sbpb, tpsb, and al are all integers representing the beats per bar, sub beats per beat, tatums per sub beat, and anacrusis length (in tatums) respectively.
  
- * `Key tonic maj/min`  
-This is a string representing the key signature, where tonic is an integer between 0 and 11 inclusive, representing the tonic note (with C=0), and maj/min is either the string "maj" or "min".
+ * `Key tonic maj/min [time]`  
+This is a string representing the key signature, where tonic is an integer between 0 and 11 inclusive, representing the tonic note (with C=0), and maj/min is either the string "maj" or "min". The time (optional integer, milliseconds) is used for key changes, and defaults to 0 if not given.
  
  * `Chord time chord`  
 Representing a chord, where time is the start time of the chord, in milliseconds, and chord is any string representing the chord.
+
+## MusicXML
