@@ -38,7 +38,7 @@ public class Main {
 							
 						case 'a':
 							DURATION_DELTA = 5;
-							ONSET_DELTA = 5;
+							ONSET_DELTA = 0;
 							GROUPING_EPSILON = 5;
 							PERFORM_ALIGNMENT = true;
 							break;
