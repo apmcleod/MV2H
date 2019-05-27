@@ -18,7 +18,7 @@ Note that while the paper and the code on the master branch only works on time-a
 The goal of this project is to create an automatic, joint, quantitative metric for complete transcription of polyphonic music. This branch includes code to evaluate a non-aligned score and ground truth.
 
 ### Using with Non-aligned Data
-When using non-aligned data, include the flag `-a` (for align) to tell the program it will need to perform alignment itself. For the time information in the input text files, you may use any tempo, provided all of the given times are correct relative to each other. The aligned metric checks only for exact timing matches, rather than using a (for example) 50ms window.
+The program will automatically perform alignment itself. For the time information in the input text files, you may use any tempo, provided all of the given times are correct relative to each other. The aligned metric checks only for exact timing matches, rather than using a (for example) 50ms window.
 
 For details on using scoring MusicXML files with metric, see the MusicXML section below.
 
@@ -27,17 +27,19 @@ The java files can all be compiled into class files in a bin directory using the
 included with the project with the following command: `$ make`.
 
 ## Running
-Run the program as follows:
-`$ java -cp bin mv2h.Main ARGS`
+Run the program one of the following ways:
+* To evaluate a transcription: `$ java -cp bin mv2h.Main -g FILE -t FILE`
+* To combine a number of evaluations: `$ java -cp bin mv2h.Main -F`
 
 ARGS:
- * `-E FILE` = Perform evaluation with the given FILE as ground truth. The transcription will be read from standard in.
- * `-F` = Perform a full meta-evaluation from standard in, where standard in may contain many results created by using -E.
+ * `-g FILE` = Use the given FILE as ground truth.
+ * `-t FILE` = Use the given FILE as the transcription.
+ * `-F` = Combine many evaluations from standard in, where standard in contains many outputs created by using -g and -t.
 
 ### Examples
 The examples directory contains two example transcriptions of an ground truth. To perform evaluation, run the following commands and you should get the results shown:
 
- * `$ java -cp bin -E examples/GroundTruth.txt <examples/Transcription1.txt`  
+ * `$ java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`  
 Multi-pitch: 0.9302325581395349  
 Voice: 0.8125  
 Meter: 0.7368421052631577  
@@ -45,7 +47,7 @@ Value: 0.9642857142857143
 Harmony: 1.0  
 MV2H: 0.8887720755376813  
  
- * `$ java -cp bin -E examples/GroundTruth.txt <examples/Transcription2.txt`  
+ * `$ java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`  
 Multi-pitch: 0.7727272727272727  
 Voice: 1.0  
 Meter: 1.0  
@@ -53,7 +55,7 @@ Value: 1.0
 Harmony: 0.5  
 MV2H: 0.8545454545454545  
  
- * `$ java -cp bin -F <examples/FullOut.txt`  
+ * `$ java -cp bin mv2h.Main -F <examples/FullOut.txt`  
 Multi-pitch: mean=0.8514799154334038 stdev=0.0787526427061301  
 Voice: mean=0.90625 stdev=0.09375  
 Meter: mean=0.8684210526315789 stdev=0.13157894736842105  
