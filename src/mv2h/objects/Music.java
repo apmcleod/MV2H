@@ -70,6 +70,10 @@ public class Music {
 	}
 	
 	public MV2H evaluateTranscription(Music transcription) {
+		if (!Main.PERFORM_ALIGNMENT) {
+			return evaluateTranscription(transcription, null);
+		}
+		
 		MV2H best = new MV2H(0, 0, 0, 0, 0);
 		
 		for (List<Integer> alignment : Aligner.getPossibleAlignments(this, transcription)) {
@@ -84,7 +88,9 @@ public class Music {
 	}
 		
 	public MV2H evaluateTranscription(Music transcription, List<Integer> alignment) {
-		transcription = transcription.align(this, alignment);
+		if (alignment != null) {
+			transcription = transcription.align(this, alignment);
+		}
 		
 		// Tracking objects
 		List<Note> transcriptionNotes = new ArrayList<Note>(transcription.notes);

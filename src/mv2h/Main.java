@@ -7,6 +7,11 @@ import java.util.Scanner;
 import mv2h.objects.Music;
 
 public class Main {
+	
+	public static int DURATION_DELTA = 100;
+	public static int ONSET_DELTA = 50;
+	public static int GROUPING_EPSILON = 50;
+	public static boolean PERFORM_ALIGNMENT = false;
 
 	public static void main(String[] args) throws IOException {
 		File groundTruth = null;
@@ -30,6 +35,13 @@ public class Main {
 						case 'F':
 							checkFull();
 							return;
+							
+						case 'a':
+							DURATION_DELTA = 0;
+							ONSET_DELTA = 0;
+							GROUPING_EPSILON = 0;
+							PERFORM_ALIGNMENT = true;
+							break;
 						
 						// Evaluate!
 						case 'g':
@@ -218,6 +230,8 @@ public class Main {
 		
 		sb.append("Usage: Main ARGS\n");
 		sb.append("ARGS:\n");
+		
+		sb.append("-a = Perform DTW alignment to evaluate non-aligned transcriptions.\n");
 		
 		sb.append("-g FILE = Use the given FILE as the ground truth (defaults to std in).\n");
 		sb.append("-t FILE = Use the given FILE as the transcription (defaults to std in).\n");

@@ -1,8 +1,8 @@
 package mv2h.objects.meter;
 
+import mv2h.Main;
+
 public class Grouping {
-	private static final int GROUPING_EPSILON = 50;
-	
 	private final int startTime;
 	private final int endTime;
 	
@@ -12,8 +12,8 @@ public class Grouping {
 	}
 	
 	public boolean matches(Grouping grouping) {
-		return Math.abs(grouping.startTime - startTime) <= GROUPING_EPSILON &&
-				Math.abs(grouping.endTime - endTime) <= GROUPING_EPSILON;
+		return Math.abs(grouping.startTime - startTime) <= Main.GROUPING_EPSILON &&
+				Math.abs(grouping.endTime - endTime) <= Main.GROUPING_EPSILON;
 	}
 	
 	public String toString() {

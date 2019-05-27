@@ -2,10 +2,9 @@ package mv2h.objects;
 
 import java.io.IOException;
 
+import mv2h.Main;
+
 public class Note implements Comparable<Note> {
-	private static final int ONSET_DELTA = 50;
-	private static final int DURATION_DELTA = 100;
-	
 	public final int pitch;
 	public final int onsetTime;
 	public final int valueOnsetTime;
@@ -21,7 +20,7 @@ public class Note implements Comparable<Note> {
 	}
 	
 	public boolean matches(Note note) {
-		return pitch == note.pitch && Math.abs(onsetTime - note.onsetTime) <= ONSET_DELTA;
+		return pitch == note.pitch && Math.abs(onsetTime - note.onsetTime) <= Main.ONSET_DELTA;
 	}
 	
 	public double getValueScore(Note groundTruth) {
@@ -30,7 +29,7 @@ public class Note implements Comparable<Note> {
 		
 		double diff = Math.abs(transcriptionDuration - groundTruthDuration);
 		
-		if (diff <= DURATION_DELTA) {
+		if (diff <= Main.DURATION_DELTA) {
 			return 1.0;
 		}
 		
