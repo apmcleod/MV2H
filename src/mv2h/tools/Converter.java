@@ -12,21 +12,62 @@ import mv2h.objects.harmony.Key;
 import mv2h.objects.meter.Hierarchy;
 import mv2h.objects.meter.Tatum;
 
+/**
+ * The <code>Converter</code> class is used to convert a given output from the MusicXMLParser
+ * (read from standard in) into a format that can be read by the MV2H package (standard out).
+ * 
+ * @author Andrew McLeod
+ */
 public class Converter {
 	
-	public List<Note> notes = new ArrayList<Note>();
-	public Hierarchy hierarchy = null;
-	public List<Key> keys = new ArrayList<Key>();
+	/**
+	 * The notes present in the XML piece.
+	 */
+	private List<Note> notes = new ArrayList<Note>();
 	
+	/**
+	 * The hierarchy of this piece.
+	 */
+	private Hierarchy hierarchy = null;
+	
+	/**
+	 * A list of the key signatures of this piece.
+	 */
+	private List<Key> keys = new ArrayList<Key>();
+	
+	/**
+	 * A list of the notes for which there hasn't yet been an offset.
+	 */
 	private List<Note> unfinishedNotes = new ArrayList<Note>();
 	
+	/**
+	 * The last tick of the piece.
+	 */
 	private int lastTick = 0;
+	
+	/**
+	 * The first tick of the piece.
+	 */
 	private int firstTick = Integer.MAX_VALUE;
 	
+	/**
+	 * Run the program, reading the MusicXMLParser output from standard in and printing to
+	 * standard out.
+	 * 
+	 * @param args Unused command line arguments.
+	 */
 	public static void main(String[] args) {
 		System.out.println(new Converter(System.in));
 	}
 	
+	/**
+	 * Create a new Converter object by parsing the input from the MusicXMLParser.
+	 * <br>
+	 * This method contains the main program logic, and printing is handled by
+	 * {@link #toString()}.
+	 * 
+	 * @param stream The MusicXMLParser output to convert.
+	 */
 	public Converter(InputStream stream) {
 		Scanner in = new Scanner(stream);
 		int lineNum = 0;
@@ -43,6 +84,7 @@ public class Converter {
 			
 			String[] attributes = line.split("\t");
 			if (attributes.length < 5) {
+				// Error if fewer than 5 columns
 				System.err.println("WARNING: Line type not found. Skipping line " + lineNum + ": " + line);
 				continue;
 			}
@@ -53,7 +95,9 @@ public class Converter {
 			lastTick = Math.max(tick, lastTick);
 			firstTick = Math.min(tick, firstTick);
 			
+			// Switch for different types of lines
 			switch (attributes[5]) {
+				// Attributes is the base line type describing time signature, tempo, etc.
 				case "attributes":
 					ticksPerQuarterNote = Integer.parseInt(attributes[6]);
 					
@@ -66,6 +110,7 @@ public class Converter {
 					
 					int subBeatsPerQuarterNote = tsDenominator / 2;
 					
+					// Check for compound meter
 					if (beatsPerBar % 3 == 0 && beatsPerBar > 3) {
 						beatsPerBar /= 3;
 						subBeatsPerBeat = 3;
@@ -79,6 +124,7 @@ public class Converter {
 					if (hierarchy != null && (hierarchy.beatsPerBar != newHierarchy.beatsPerBar ||
 							hierarchy.subBeatsPerBeat != newHierarchy.subBeatsPerBeat ||
 							hierarchy.tatumsPerSubBeat != newHierarchy.tatumsPerSubBeat)) {
+						// TODO: Handle time changes
 						System.err.println("WARNING: Meter change detected (" + hierarchy + " to " + newHierarchy + ") on line " + lineNum + ": " + line);
 					} else {
 						hierarchy = newHierarchy;
@@ -97,12 +143,14 @@ public class Converter {
 					break;
 					
 				case "chord":
+					// There are notes here
 					int duration = Integer.parseInt(attributes[6]);
 					lastTick = Math.max(tick + duration, lastTick);
 					
 					int tieInfo = Integer.parseInt(attributes[7]);
 					int numNotes = Integer.parseInt(attributes[8]);
 					
+					// Get all of the pitches
 					int[] pitches = new int[numNotes];
 					for (int i = 0; i < numNotes; i++) {
 						try {
@@ -113,6 +161,7 @@ public class Converter {
 						}
 					}
 					
+					// Handle each pitch
 					for (int pitch : pitches) {
 						switch (tieInfo) {
 							// No tie
@@ -191,12 +240,24 @@ public class Converter {
 		
 		in.close();
 		
+		// Check for any unfinished notes (because of ties out).
 		for (Note note : unfinishedNotes) {
 			System.err.println("WARNING: Tie never ended for note " + note + ". Adding note as untied.");
 			notes.add(note);
 		}
 	}
 	
+	/**
+	 * Find a tied out note that matches a new tied in note, return it, and remove it from
+	 * {@link #unfinishedNotes}.
+	 * 
+	 * @param pitch The pitch of the tie.
+	 * @param valueOnsetTime The onset time of the tied in note.
+	 * @param voice The voice of the tied in note.
+	 * 
+	 * @return The note from {@link #unfinishedNotes} that matches the pitch onset time and voice.
+	 * @throws IOException If no matching note is found.
+	 */
 	private Note findAndRemoveUnfinishedNote(int pitch, int valueOnsetTime, int voice) throws IOException {
 		Iterator<Note> noteIterator = unfinishedNotes.iterator();
 		while (noteIterator.hasNext()) {
@@ -211,11 +272,23 @@ public class Converter {
 		throw new IOException("Tied note not found at pitch=" + pitch + " offset=" + valueOnsetTime + " voice=" + voice + ".");
 	}
 	
+	/**
+	 * Convert from XML tick to time, using 600ms per beat.
+	 * 
+	 * @param tick The XML tick.
+	 * @return The time, in milliseconds.
+	 */
 	private int getTimeFromTick(int tick) {
-		return (int) Math.round(((double) tick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * 250);
+		return (int) Math.round(((double) tick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * 600);
 	}
 	
-	public List<Tatum> getTatums() {
+	/**
+	 * Create and return a list of tatums based on the parsed {@link #hierarchy}, {@link #firstTick}, and
+	 * {@link #lastTick}.
+	 * 
+	 * @return A list of the parsed tatums.
+	 */
+	private List<Tatum> getTatums() {
 		List<Tatum> tatums = new ArrayList<Tatum>(lastTick - firstTick);
 		
 		for (int tick = firstTick; tick < lastTick; tick++) {
@@ -225,6 +298,12 @@ public class Converter {
 		return tatums;
 	}
 	
+	/**
+	 * Return a String version of the parsed musical score into our mv2h format.
+	 * 
+	 * @return The parsed musical score.
+	 */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		
