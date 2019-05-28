@@ -12,6 +12,7 @@ This is the code and data from my 2018 ISMIR paper. If you use it, please cite i
 }
 ```
 
+### Non-aligned Data
 Note that while the paper and the code on the master branch only works on time-aligned input and ground truth pairs, the code in the regress branch uses Dynamic Time Warping to automatically align non-aligned input and ground truth. For now, please still cite the original publication if you use this new version.
 
 ## Project Overview
