@@ -31,6 +31,11 @@ public class KeyProgression {
 	 * @param key The key to add.
 	 */
 	public void addKey(Key key) {
+		if (keys.contains(key)) {
+			// Remove if already contain a key at this time.
+			keys.remove(key);
+		}
+		
 		keys.add(key);
 	}
 	

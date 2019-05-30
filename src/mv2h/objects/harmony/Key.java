@@ -4,7 +4,7 @@ import java.io.IOException;
 
 /**
  * A <code>Key</code> object represents a musical key with a tonic, either major or minor mode,
- * and a start time. They are naturally ordered by increasing time, then tonic and mode.
+ * and a start time. They are naturally ordered by increasing time.
  * <br>
  * See {@link KeyProgression}.
  * 
@@ -46,9 +46,7 @@ public class Key implements Comparable<Key> {
 	 * @param isMajor {@link #isMajor}
 	 */
 	public Key(int tonic, boolean isMajor) {
-		this.tonic = tonic;
-		this.isMajor = isMajor;
-		time = 0;
+		this(tonic, isMajor, 0);
 	}
 	
 	/**
@@ -96,17 +94,7 @@ public class Key implements Comparable<Key> {
 	
 	@Override
 	public int compareTo(Key o) {
-		int result = Integer.compare(time, o.time);
-		if (result != 0) {
-			return result;
-		}
-		
-		result = Integer.compare(tonic, o.tonic);
-		if (result != 0) {
-			return result;
-		}
-		
-		return Boolean.compare(isMajor, o.isMajor);
+		return Integer.compare(time, o.time);
 	}
 	
 	@Override

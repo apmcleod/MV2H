@@ -332,7 +332,10 @@ public class Music {
 		
 		// Convert the metrical structure times
 		Meter newMeter = new Meter();
-		newMeter.setHierarchy(meter.getHierarchy());
+		for (Hierarchy h : meter.getHierarchies()) {
+			newMeter.addHierarchy(new Hierarchy(h.beatsPerBar, h.subBeatsPerBeat, h.tatumsPerSubBeat, h.anacrusisLengthTatums,
+					Aligner.convertTime(h.time, gt, this, alignment)));
+		}
 		for (Tatum tatum : meter.getTatums()) {
 			newMeter.addTatum(new Tatum(Aligner.convertTime(tatum.time, gt, this, alignment)));
 		}
@@ -402,7 +405,7 @@ public class Music {
 
 			} else if (line.startsWith("Hierarchy")) {
 				Hierarchy hierarchy = Hierarchy.parseHierarchy(line);
-				meter.setHierarchy(hierarchy);
+				meter.addHierarchy(hierarchy);
 
 			} else if (line.startsWith("Key")) {
 				Key key = Key.parseKey(line);

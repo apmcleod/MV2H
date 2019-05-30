@@ -29,6 +29,11 @@ public class ChordProgression {
 	 * @param chord The chord to add.
 	 */
 	public void addChord(Chord chord) {
+		if (chords.contains(chord)) {
+			// Remove if already contain a chord at this time.
+			chords.remove(chord);
+		}
+		
 		chords.add(chord);
 	}
 	

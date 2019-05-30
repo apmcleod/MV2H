@@ -47,17 +47,7 @@ public class Chord implements Comparable<Chord> {
 
 	@Override
 	public int compareTo(Chord o) {
-		int result = Integer.compare(time, o.time);
-		if (result != 0) {
-			return result;
-		}
-		
-		result = chord.compareTo(o.chord);
-		if (result != 0) {
-			return result;
-		}
-		
-		return 0;
+		return Integer.compare(time, o.time);
 	}
 
 	/**

@@ -4,11 +4,11 @@ import java.io.IOException;
 
 /**
  * A <code>Hierarchy</code> object represents the metrical structure of a single bar, and its anacrusis length.
- * See {@link Meter}. 
+ * See {@link Meter}. They are naturally ordered by increasing time.
  * 
  * @author Andrew McLeod
  */
-public class Hierarchy {
+public class Hierarchy implements Comparable<Hierarchy> {
 	/**
 	 * The number of beats per bar in this metrical structure.
 	 */
@@ -30,7 +30,30 @@ public class Hierarchy {
 	public final int anacrusisLengthTatums;
 	
 	/**
+	 * The start time of this hierarchy, in milliseconds. The anacrusis begins counting from the next tatum
+	 * immediately following this time.
+	 */
+	public final int time;
+	
+	/**
 	 * Create a new hierarchy with the given fields.
+	 * 
+	 * @param beatsPerBar {@link #beatsPerBar}
+	 * @param subBeatsPerBeat {@link #subBeatsPerBeat}
+	 * @param tatumsPerSubBeat {@link #tatumsPerSubBeat}
+	 * @param anacrusisLengthTatums {@link #anacrusisLengthTatums}
+	 * @param time {@link #time}
+	 */
+	public Hierarchy(int beatsPerBar, int subBeatsPerBeat, int tatumsPerSubBeat, int anacrusisLengthTatums, int time) {
+		this.beatsPerBar = beatsPerBar;
+		this.subBeatsPerBeat = subBeatsPerBeat;
+		this.tatumsPerSubBeat = tatumsPerSubBeat;
+		this.anacrusisLengthTatums = anacrusisLengthTatums;
+		this.time = time;
+	}
+	
+	/**
+	 * Create a new hierarchy at time 0.
 	 * 
 	 * @param beatsPerBar {@link #beatsPerBar}
 	 * @param subBeatsPerBeat {@link #subBeatsPerBeat}
@@ -38,22 +61,19 @@ public class Hierarchy {
 	 * @param anacrusisLengthTatums {@link #anacrusisLengthTatums}
 	 */
 	public Hierarchy(int beatsPerBar, int subBeatsPerBeat, int tatumsPerSubBeat, int anacrusisLengthTatums) {
-		this.beatsPerBar = beatsPerBar;
-		this.subBeatsPerBeat = subBeatsPerBeat;
-		this.tatumsPerSubBeat = tatumsPerSubBeat;
-		this.anacrusisLengthTatums = anacrusisLengthTatums;
+		this(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, anacrusisLengthTatums, 0);
 	}
 	
 	@Override
 	public String toString() {
-		return "Hierarchy " + beatsPerBar + "," + subBeatsPerBeat + " " + tatumsPerSubBeat + " a=" + anacrusisLengthTatums;
+		return "Hierarchy " + beatsPerBar + "," + subBeatsPerBeat + " " + tatumsPerSubBeat + " a=" + anacrusisLengthTatums + " " + time;
 	}
 
 	/**
 	 * Parse a hierarchy definition from the given line.
 	 * <br>
 	 * It should be of the form
-	 * <code>Hierarchy beatsPerBar,subBeatsPerBeat tatumsPerSubBeat a=anacrusisLengthTatums</code>.
+	 * <code>Hierarchy beatsPerBar,subBeatsPerBeat tatumsPerSubBeat a=anacrusisLengthTatums [time]</code>.
 	 * 
 	 * @param line The hierarchy to parse.
 	 * @return The parsed Hierarchy.
@@ -63,7 +83,7 @@ public class Hierarchy {
 	public static Hierarchy parseHierarchy(String line) throws IOException {
 		String[] hierarchySplit = line.split(" ");
 		
-		if (hierarchySplit.length != 4) {
+		if (hierarchySplit.length < 4 || hierarchySplit.length > 5) {
 			throw new IOException("Error parsing hierarchy: " + line);
 		}
 		
@@ -105,6 +125,20 @@ public class Hierarchy {
 			throw new IOException("Error parsing Hierarchy. Anacrusis length not recognised: " + line);
 		}
 		
-		return new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, anacrusisLengthTatums);
+		int time = 0;
+		if (hierarchySplit.length == 5) {
+			try {
+				time = Integer.parseInt(hierarchySplit[4]);
+			} catch (NumberFormatException e) {
+				throw new IOException("Error parsing Hierarchy. Time not recognised: " + line);
+			}
+		}
+		
+		return new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, anacrusisLengthTatums, time);
+	}
+
+	@Override
+	public int compareTo(Hierarchy o) {
+		return Integer.compare(time, o.time);
 	}
 }

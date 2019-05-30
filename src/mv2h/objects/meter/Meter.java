@@ -15,9 +15,9 @@ import mv2h.Main;
  */
 public class Meter {
 	/**
-	 * The time signature (metrical structure) of the score.
+	 * A unique, ordered set of hierarchies of the musical score.
 	 */
-	private Hierarchy hierarchy;
+	private final SortedSet<Hierarchy> hierarchies;
 	
 	/**
 	 * A unique, ordered set of the tatum times of the musical score.
@@ -29,7 +29,8 @@ public class Meter {
 	 */
 	public Meter() {
 		tatums = new TreeSet<Tatum>();
-		hierarchy = new Hierarchy(4, 2, 4, 0);
+		hierarchies = new TreeSet<Hierarchy>();
+		hierarchies.add(new Hierarchy(4, 2, 4, 0));
 	}
 	
 	/**
@@ -42,21 +43,26 @@ public class Meter {
 	}
 	
 	/**
-	 * Set the hierarchy of this score.
+	 * Add a hierarchy to this score.
 	 * 
-	 * @param hierarchy {@link #hierarchy}
+	 * @param hierarchy The hierarchy to add.
 	 */
-	public void setHierarchy(Hierarchy hierarchy) {
-		this.hierarchy = hierarchy;
+	public void addHierarchy(Hierarchy hierarchy) {
+		if (hierarchies.contains(hierarchy)) {
+			// Remove any hierarchy at the same time
+			hierarchies.remove(hierarchy);
+		}
+		
+		hierarchies.add(hierarchy);
 	}
 	
 	/**
-	 * Get the hierarchy of this score.
+	 * Get the hierarchies of this score.
 	 * 
 	 * @return {@link #hierarchy}
 	 */
-	public Hierarchy getHierarchy() {
-		return hierarchy;
+	public List<Hierarchy> getHierarchies() {
+		return new ArrayList<Hierarchy>(hierarchies);
 	}
 	
 	/**
@@ -75,27 +81,81 @@ public class Meter {
 	 */
 	private List<Grouping> getGroupings() {
 		List<Grouping> groupings = new ArrayList<Grouping>();
-		List<Tatum> tatumList = getTatums();
 		
-		// Sub beats
-		int length = hierarchy.tatumsPerSubBeat;
-		int start = hierarchy.anacrusisLengthTatums % length;
-		for (int tatumIndex = start; tatumIndex + length < tatumList.size(); tatumIndex += length) {
-			groupings.add(new Grouping(tatumList.get(tatumIndex).time, tatumList.get(tatumIndex + length).time));
+		Iterator<Tatum> tatumIterator = getTatums().iterator();
+		Iterator<Hierarchy> hierarchyIterator = getHierarchies().iterator();
+		
+		// Quick exit for no tatums or no hierarchies
+		if (!tatumIterator.hasNext() || !hierarchyIterator.hasNext()) {
+			return groupings;
 		}
 		
-		// Beats
-		length = hierarchy.tatumsPerSubBeat * hierarchy.subBeatsPerBeat;
-		start = hierarchy.anacrusisLengthTatums % length;
-		for (int tatumIndex = start; tatumIndex + length < tatumList.size(); tatumIndex += length) {
-			groupings.add(new Grouping(tatumList.get(tatumIndex).time, tatumList.get(tatumIndex + length).time));
-		}
+		// Set up tracking vars
+		Tatum thisTatum = tatumIterator.next();
+		Tatum nextTatum = tatumIterator.hasNext() ? tatumIterator.next() : null;
 		
-		// Bars
-		length = hierarchy.tatumsPerSubBeat * hierarchy.subBeatsPerBeat * hierarchy.beatsPerBar;
-		start = hierarchy.anacrusisLengthTatums % length;
-		for (int tatumIndex = start; tatumIndex + length < tatumList.size(); tatumIndex += length) {
-			groupings.add(new Grouping(tatumList.get(tatumIndex).time, tatumList.get(tatumIndex + length).time));
+		Hierarchy thisHierarchy = hierarchyIterator.next();
+		Hierarchy nextHierarchy = hierarchyIterator.hasNext() ? hierarchyIterator.next() : null;
+		
+		int tatumsPerSubBeat = thisHierarchy.tatumsPerSubBeat;
+		int tatumsPerBeat = tatumsPerSubBeat * thisHierarchy.subBeatsPerBeat;
+		int tatumsPerBar = tatumsPerBeat * thisHierarchy.beatsPerBar;
+		
+		int tatumNum = thisHierarchy.anacrusisLengthTatums == 0 ? 0 : tatumsPerBar - thisHierarchy.anacrusisLengthTatums;
+		
+		int subBeatStart = tatumNum % tatumsPerSubBeat == 0 ? thisTatum.time : -1;
+		int beatStart = tatumNum % tatumsPerBeat == 0 ? thisTatum.time : -1;
+		int barStart = tatumNum % tatumsPerBar == 0 ? thisTatum.time : -1;
+		
+		while (nextTatum != null) {
+			// Go to next tatum
+			thisTatum = nextTatum;
+			nextTatum = tatumIterator.hasNext() ? tatumIterator.next() : null;
+			tatumNum++;
+			
+			if (nextHierarchy != null && nextHierarchy.time <= thisTatum.time) {
+				// Go to next hierarchy
+				thisHierarchy = nextHierarchy;
+				nextHierarchy = hierarchyIterator.hasNext() ? hierarchyIterator.next() : null;
+				
+				tatumsPerSubBeat = thisHierarchy.tatumsPerSubBeat;
+				tatumsPerBeat = tatumsPerSubBeat * thisHierarchy.subBeatsPerBeat;
+				tatumsPerBar = tatumsPerBeat * thisHierarchy.beatsPerBar;
+				
+				tatumNum = thisHierarchy.anacrusisLengthTatums == 0 ? 0 : tatumsPerBar - thisHierarchy.anacrusisLengthTatums;
+			}
+			
+			// Check for grouping starts/ends
+			
+			// Sub beat
+			if (tatumNum % tatumsPerSubBeat == 0) {
+				if (subBeatStart != -1) {
+					// Already started
+					groupings.add(new Grouping(subBeatStart, thisTatum.time));
+				}
+				
+				subBeatStart = thisTatum.time;
+			}
+			
+			// Beat
+			if (tatumNum % tatumsPerBeat == 0) {
+				if (beatStart != -1) {
+					// Already started
+					groupings.add(new Grouping(beatStart, thisTatum.time));
+				}
+				
+				beatStart = thisTatum.time;
+			}
+			
+			// Bar
+			if (tatumNum % tatumsPerBar == 0) {
+				if (barStart != -1) {
+					// Already started
+					groupings.add(new Grouping(barStart, thisTatum.time));
+				}
+				
+				barStart = thisTatum.time;
+			}
 		}
 		
 		return groupings;
@@ -135,6 +195,6 @@ public class Meter {
 	
 	@Override
 	public String toString() {
-		return "Meter " + hierarchy + " Tatums " + tatums;
+		return "Meters " + hierarchies + " Tatums " + tatums;
 	}
 }
