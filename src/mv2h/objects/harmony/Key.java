@@ -2,23 +2,64 @@ package mv2h.objects.harmony;
 
 import java.io.IOException;
 
+/**
+ * A <code>Key</code> object represents a musical key with a tonic, either major or minor mode,
+ * and a start time. They are naturally ordered by increasing time, then tonic and mode.
+ * <br>
+ * See {@link KeyProgression}.
+ * 
+ * @author Andrew McLeod
+ */
 public class Key implements Comparable<Key> {
+	/**
+	 * The tonic of this key.
+	 */
 	public final int tonic;
+	
+	/**
+	 * True if this key is major. False for minor.
+	 */
 	public final boolean isMajor;
+	
+	/**
+	 * The starting time of this key, in milliseconds.
+	 */
 	public final int time;
 	
+	/**
+	 * Create a new Key.
+	 * 
+	 * @param tonic {@link #tonic}
+	 * @param isMajor {@link #isMajor}
+	 * @param startTime {@link #time}
+	 */
 	public Key(int tonic, boolean isMajor, int startTime) {
 		this.tonic = tonic;
 		this.isMajor = isMajor;
 		this.time = startTime;
 	}
 	
+	/**
+	 * Create a new Key at time 0.
+	 * 
+	 * @param tonic {@link #tonic}
+	 * @param isMajor {@link #isMajor}
+	 */
 	public Key(int tonic, boolean isMajor) {
 		this.tonic = tonic;
 		this.isMajor = isMajor;
 		time = 0;
 	}
 	
+	/**
+	 * Get the score of a transcribed key given some ground truth.
+	 * 
+	 * @param groundTruth The ground truth key.
+	 * 
+	 * @return The score of the transcribed key. 1 for a perfect match, 0.5 for correct
+	 * mode but tonic off by a perfect 5th, 0.3 for relative major or minor(CM, am), 0.2 for
+	 * parallel major or minor (CM, cm), and 0 otherwise.
+	 */
 	public double getScore(Key groundTruth) {
 		// Correct
 		if (tonic == groundTruth.tonic && isMajor == groundTruth.isMajor) {
@@ -68,14 +109,24 @@ public class Key implements Comparable<Key> {
 		return Boolean.compare(isMajor, o.isMajor);
 	}
 	
+	@Override
 	public String toString() {
 		return "Key " + tonic + " " + (isMajor ? "Maj" : "min") + " " + time;
 	}
 
+	/**
+	 * Parse a Key from a given string. The string should be of the form
+	 * <code>Key tonic maj/min [time]</code>.
+	 * 
+	 * @param line The string to parse.
+	 * @return The parsed key.
+	 * 
+	 * @throws IOException If the string was of an invalid format.
+	 */
 	public static Key parseKey(String line) throws IOException {
 		String[] keySplit = line.split(" ");
 		
-		if (keySplit.length < 3) {
+		if (keySplit.length < 3 || keySplit.length > 4) {
 			throw new IOException("Error parsing Key: " + line);
 		}
 		
