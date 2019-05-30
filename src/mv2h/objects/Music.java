@@ -306,6 +306,8 @@ public class Music {
 	 * 
 	 * @param gt The ground truth Music object.
 	 * @param alignment The alignment to re-map with.
+	 * An alignment is a list containing, for each transcribed note list, the index of the ground
+	 * truth note list to which it is aligned, or -1 if it was not aligned with any ground truth note.
 	 * 
 	 * @return A new Music object with the given alignment.
 	 */
