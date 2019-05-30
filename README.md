@@ -81,14 +81,18 @@ This represents a note. Pitch, on, onVal, offVal, and voice are all integers, re
 This represents a tatum pulse at the given time (an integer, in milliseconds).
  
  
- * `Hierarchy bpb,sbpb tpsb a=al`  
-This represents the metrical hierarchy, where bpb, sbpb, tpsb, and al are all integers representing the beats per bar, sub beats per beat, tatums per sub beat, and anacrusis length (in tatums) respectively.
+ * `Hierarchy bpb,sbpb tpsb a=al [time]`  
+This represents the metrical hierarchy, where bpb, sbpb, tpsb, and al are all integers representing the beats per bar, sub beats per beat, tatums per sub beat, and anacrusis length (in tatums) respectively. The time is in milliseconds, and assumed to be 0 if not given.
+
+Beginning a new hierarchy on a non-downbeat, while not recommended, is supported. The previous downbeat, and start to the most recent beat and sub beat are saved, and the tatum position is updated as in the new bar. Thus, 1 beat of a 2/4 bar, followed by 3 beats of a 4/4 bar with a 3 beat anacrusis, is equivalent to a single 4/4 bar.
  
  * `Key tonic maj/min [time]`  
 This is a string representing the key signature, where tonic is an integer between 0 and 11 inclusive, representing the tonic note (with C=0), and maj/min is either the string "maj" or "min". The time (optional integer, milliseconds) is used for key changes, and defaults to 0 if not given.
  
  * `Chord time chord`  
 Representing a chord, where time is the start time of the chord, in milliseconds, and chord is any string representing the chord.
+
+For any duplicate times, only the most last given chord, key, or hierarchy are saved. Duplicate tatums are ignored.
 
 ## MusicXML
 To score MusicXML files:
