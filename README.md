@@ -1,6 +1,8 @@
 # MV2H
 
-This is the code and data from my 2018 ISMIR paper. If you use it, please cite it:
+This is the code for the MV2H metric, originally proposed in my 2018 ISMIR paper. It has since been adapted to handle non-time-aligned transcriptions (i.e. musical score to musical score evaluation), as detailed in the technical report on arXiv.
+
+If you use the metric, please cite it:
 
 ```
 @inproceedings{McLeod:18a,
@@ -11,6 +13,8 @@ This is the code and data from my 2018 ISMIR paper. If you use it, please cite i
   pages={42--49}
 }
 ```
+
+For the original version of the code, as it was for the ISMIR 2018 submission, see the tag v1.0: https://github.com/apmcleod/MV2H/releases/tag/v1.0
 
 ### Non-aligned Data
 Note that while the paper and the code on the master branch only works on time-aligned input and ground truth pairs, the code in the regress branch uses Dynamic Time Warping to automatically align non-aligned input and ground truth. For now, please still cite the original publication if you use this new version.
