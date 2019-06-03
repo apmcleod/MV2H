@@ -1,0 +1,404 @@
+Note 68 1125 1125 1500 1
+Note 52 1625 1625 1750 5
+Note 59 1625 1625 1750 5
+Note 71 2125 2125 2250 1
+Note 69 2250 2250 2333 1
+Note 68 2333 2333 2417 1
+Note 66 2417 2417 2500 1
+Note 64 2625 2625 2750 1
+Note 76 3500 3500 4000 1
+Note 47 2125 2125 2250 5
+Note 59 2125 2125 2250 5
+Note 52 2625 2625 2750 5
+Note 56 2625 2625 2750 5
+Note 59 3000 3000 3500 5
+Note 75 4000 4000 4250 1
+Note 73 4250 4250 4333 1
+Note 75 4250 4250 4333 1
+Note 73 4333 4333 4417 1
+Note 75 4333 4333 4417 1
+Note 64 4417 4417 4500 1
+Note 73 4417 4417 4500 1
+Note 73 4500 4500 4583 1
+Note 75 4500 4500 4583 1
+Note 75 4583 4583 4667 1
+Note 73 4667 4667 4750 1
+Note 75 4667 4667 4750 1
+Note 75 4750 4750 4833 1
+Note 73 4833 4833 4917 1
+Note 64 4917 4917 5000 1
+Note 71 4917 4917 5000 1
+Note 75 5083 5083 5167 1
+Note 76 5167 5167 5250 1
+Note 80 5250 5250 5375 1
+Note 71 5375 5375 5500 1
+Note 57 4500 4500 5000 5
+Note 56 5000 5000 5500 5
+Note 63 5875 5875 6000 1
+Note 69 6125 6125 6250 1
+Note 69 6250 6250 6375 1
+Note 71 6250 6250 6375 1
+Note 64 6375 6375 6500 1
+Note 68 6375 6375 6500 1
+Note 80 7000 7000 7500 1
+Note 64 7500 7500 7750 1
+Note 71 7500 7500 7750 1
+Note 82 7833 7833 7917 1
+Note 63 7917 7917 8000 1
+Note 71 7917 7917 8000 1
+Note 83 7917 7917 8000 1
+Note 54 5500 5500 6000 5
+Note 52 6375 6375 6500 5
+Note 82 8083 8083 8167 1
+Note 80 8167 8167 8250 1
+Note 78 8250 8250 8375 1
+Note 61 8375 8375 8500 1
+Note 78 8375 8375 8500 1
+Note 76 8583 8583 8667 1
+Note 76 8667 8667 8750 1
+Note 78 8667 8667 8750 1
+Note 76 8750 8750 8833 1
+Note 78 8750 8750 8833 1
+Note 70 8833 8833 8917 1
+Note 78 8833 8833 8917 1
+Note 76 8917 8917 9000 1
+Note 78 8917 8917 9000 1
+Note 71 9375 9375 9500 1
+Note 75 9375 9375 9500 1
+Note 64 9833 9833 9917 1
+Note 68 9833 9833 9917 1
+Note 72 9833 9833 9917 1
+Note 73 9917 9917 10000 1
+Note 59 9375 9375 9500 5
+Note 76 10000 10000 10125 1
+Note 80 10125 10125 10250 1
+Note 63 10250 10250 10500 1
+Note 71 10250 10250 10500 1
+Note 70 10625 10625 10750 1
+Note 61 10750 10750 11000 1
+Note 64 10750 10750 11000 1
+Note 71 10750 10750 11000 1
+Note 64 11250 11250 11500 1
+Note 70 11250 11250 11500 1
+Note 54 10250 10250 10500 5
+Note 54 10750 10750 11000 5
+Note 59 11250 11250 11500 5
+Note 63 12250 12250 12500 1
+Note 71 12250 12250 12500 1
+Note 54 11750 11750 12000 5
+Note 47 12250 12250 12500 5
+Tatum 0
+Tatum 42
+Tatum 83
+Tatum 125
+Tatum 167
+Tatum 208
+Tatum 250
+Tatum 292
+Tatum 333
+Tatum 375
+Tatum 417
+Tatum 458
+Tatum 500
+Tatum 542
+Tatum 583
+Tatum 625
+Tatum 667
+Tatum 708
+Tatum 750
+Tatum 792
+Tatum 833
+Tatum 875
+Tatum 917
+Tatum 958
+Tatum 1000
+Tatum 1042
+Tatum 1083
+Tatum 1125
+Tatum 1167
+Tatum 1208
+Tatum 1250
+Tatum 1292
+Tatum 1333
+Tatum 1375
+Tatum 1417
+Tatum 1458
+Tatum 1500
+Tatum 1542
+Tatum 1583
+Tatum 1625
+Tatum 1667
+Tatum 1708
+Tatum 1750
+Tatum 1792
+Tatum 1833
+Tatum 1875
+Tatum 1917
+Tatum 1958
+Tatum 2000
+Tatum 2042
+Tatum 2083
+Tatum 2125
+Tatum 2167
+Tatum 2208
+Tatum 2250
+Tatum 2292
+Tatum 2333
+Tatum 2375
+Tatum 2417
+Tatum 2458
+Tatum 2500
+Tatum 2542
+Tatum 2583
+Tatum 2625
+Tatum 2667
+Tatum 2708
+Tatum 2750
+Tatum 2792
+Tatum 2833
+Tatum 2875
+Tatum 2917
+Tatum 2958
+Tatum 3000
+Tatum 3042
+Tatum 3083
+Tatum 3125
+Tatum 3167
+Tatum 3208
+Tatum 3250
+Tatum 3292
+Tatum 3333
+Tatum 3375
+Tatum 3417
+Tatum 3458
+Tatum 3500
+Tatum 3542
+Tatum 3583
+Tatum 3625
+Tatum 3667
+Tatum 3708
+Tatum 3750
+Tatum 3792
+Tatum 3833
+Tatum 3875
+Tatum 3917
+Tatum 3958
+Tatum 4000
+Tatum 4042
+Tatum 4083
+Tatum 4125
+Tatum 4167
+Tatum 4208
+Tatum 4250
+Tatum 4292
+Tatum 4333
+Tatum 4375
+Tatum 4417
+Tatum 4458
+Tatum 4500
+Tatum 4542
+Tatum 4583
+Tatum 4625
+Tatum 4667
+Tatum 4708
+Tatum 4750
+Tatum 4792
+Tatum 4833
+Tatum 4875
+Tatum 4917
+Tatum 4958
+Tatum 5000
+Tatum 5042
+Tatum 5083
+Tatum 5125
+Tatum 5167
+Tatum 5208
+Tatum 5250
+Tatum 5292
+Tatum 5333
+Tatum 5375
+Tatum 5417
+Tatum 5458
+Tatum 5500
+Tatum 5542
+Tatum 5583
+Tatum 5625
+Tatum 5667
+Tatum 5708
+Tatum 5750
+Tatum 5792
+Tatum 5833
+Tatum 5875
+Tatum 5917
+Tatum 5958
+Tatum 6000
+Tatum 6042
+Tatum 6083
+Tatum 6125
+Tatum 6167
+Tatum 6208
+Tatum 6250
+Tatum 6292
+Tatum 6333
+Tatum 6375
+Tatum 6417
+Tatum 6458
+Tatum 6500
+Tatum 6542
+Tatum 6583
+Tatum 6625
+Tatum 6667
+Tatum 6708
+Tatum 6750
+Tatum 6792
+Tatum 6833
+Tatum 6875
+Tatum 6917
+Tatum 6958
+Tatum 7000
+Tatum 7042
+Tatum 7083
+Tatum 7125
+Tatum 7167
+Tatum 7208
+Tatum 7250
+Tatum 7292
+Tatum 7333
+Tatum 7375
+Tatum 7417
+Tatum 7458
+Tatum 7500
+Tatum 7542
+Tatum 7583
+Tatum 7625
+Tatum 7667
+Tatum 7708
+Tatum 7750
+Tatum 7792
+Tatum 7833
+Tatum 7875
+Tatum 7917
+Tatum 7958
+Tatum 8000
+Tatum 8042
+Tatum 8083
+Tatum 8125
+Tatum 8167
+Tatum 8208
+Tatum 8250
+Tatum 8292
+Tatum 8333
+Tatum 8375
+Tatum 8417
+Tatum 8458
+Tatum 8500
+Tatum 8542
+Tatum 8583
+Tatum 8625
+Tatum 8667
+Tatum 8708
+Tatum 8750
+Tatum 8792
+Tatum 8833
+Tatum 8875
+Tatum 8917
+Tatum 8958
+Tatum 9000
+Tatum 9042
+Tatum 9083
+Tatum 9125
+Tatum 9167
+Tatum 9208
+Tatum 9250
+Tatum 9292
+Tatum 9333
+Tatum 9375
+Tatum 9417
+Tatum 9458
+Tatum 9500
+Tatum 9542
+Tatum 9583
+Tatum 9625
+Tatum 9667
+Tatum 9708
+Tatum 9750
+Tatum 9792
+Tatum 9833
+Tatum 9875
+Tatum 9917
+Tatum 9958
+Tatum 10000
+Tatum 10042
+Tatum 10083
+Tatum 10125
+Tatum 10167
+Tatum 10208
+Tatum 10250
+Tatum 10292
+Tatum 10333
+Tatum 10375
+Tatum 10417
+Tatum 10458
+Tatum 10500
+Tatum 10542
+Tatum 10583
+Tatum 10625
+Tatum 10667
+Tatum 10708
+Tatum 10750
+Tatum 10792
+Tatum 10833
+Tatum 10875
+Tatum 10917
+Tatum 10958
+Tatum 11000
+Tatum 11042
+Tatum 11083
+Tatum 11125
+Tatum 11167
+Tatum 11208
+Tatum 11250
+Tatum 11292
+Tatum 11333
+Tatum 11375
+Tatum 11417
+Tatum 11458
+Tatum 11500
+Tatum 11542
+Tatum 11583
+Tatum 11625
+Tatum 11667
+Tatum 11708
+Tatum 11750
+Tatum 11792
+Tatum 11833
+Tatum 11875
+Tatum 11917
+Tatum 11958
+Tatum 12000
+Tatum 12042
+Tatum 12083
+Tatum 12125
+Tatum 12167
+Tatum 12208
+Tatum 12250
+Tatum 12292
+Tatum 12333
+Tatum 12375
+Tatum 12417
+Tatum 12458
+Tatum 12500
+Tatum 12542
+Tatum 12583
+Tatum 12625
+Tatum 12667
+Tatum 12708
+Tatum 12750
+Tatum 12792
+Tatum 12833
+Tatum 12875
+Tatum 12917
+Tatum 12958
+Key 0 Maj 0
+Hierarchy 4,2 6 a=0
+

@@ -1,3 +1,4 @@
 .classpath
 .project
 bin/**
+MusicXMLParser/MusicXMLToFmt1x
