@@ -1,6 +1,6 @@
 # MV2H
 
-This is the code for the MV2H metric, originally proposed in my 2018 ISMIR paper. It has since been adapted to handle non-time-aligned transcriptions (i.e. musical score to musical score evaluation), as detailed in the technical report on arXiv.
+This is the code for the MV2H metric, originally proposed in my 2018 ISMIR paper. It has since been adapted to handle non-time-aligned transcriptions (i.e. musical score to musical score evaluation), as detailed in the technical report on [arXiv](https://arxiv.org/abs/1906.00566).
 
 If you use the metric, please cite it:
 
@@ -14,7 +14,7 @@ If you use the metric, please cite it:
 }
 ```
 
-For the original version of the code, as it was for the ISMIR 2018 submission, see the tag v1.0: https://github.com/apmcleod/MV2H/releases/tag/v1.0
+For the original version of the code, as it was for the ISMIR 2018 submission, see the tag [v1.0](https://github.com/apmcleod/MV2H/releases/tag/v1.0).
 
 ### Non-aligned Data
 Note that while the paper and the code on the master branch only works on time-aligned input and ground truth pairs, the code in the regress branch uses Dynamic Time Warping to automatically align non-aligned input and ground truth. For now, please still cite the original publication if you use this new version.
@@ -110,7 +110,7 @@ The dataset directory contains files generated using the above process on the da
 ```
 Andrea Cogliati, Zhiyao Duan, A metric for Music Notation Transcription Accuracy, Proc. of International Society for Music Information Retrieval Conference (ISMIR), Suzhou, China, Oct 2017.
 ```
-The original music XML files are available here: https://github.com/AndreaCogliati/MetricForScoreSimilarity
+The original music XML files are available [here](https://github.com/AndreaCogliati/MetricForScoreSimilarity).
 * dataset/parsed-xml contains the outputs of the C++ converter.
 * dataset/converted contains the outputs of my java Converter tool.
 * dataset/outs contains the resulting evaluation scores for each transcription.
