@@ -8,7 +8,7 @@ If you use the metric, please cite it:
 @inproceedings{McLeod:18a,
   title={Evaluating automatic polyphonic music transcription},
   author={McLeod, Andrew and Steedman, Mark},
-  booktitle={{ISMIR}},
+  booktitle={International Society for Music Information Retrieval Conference (ISMIR)},
   year={2018},
   pages={42--49}
 }
