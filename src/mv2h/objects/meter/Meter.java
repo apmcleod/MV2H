@@ -25,12 +25,21 @@ public class Meter {
 	private final SortedSet<Tatum> tatums;
 	
 	/**
-	 * Create a new empty meter object, defaulting to 4/4 time and 4 tatums per sub beat.
+	 * Create a new empty meter object, defaulting to 4/4 time and 4 tatums per sub beat at time 0.
 	 */
 	public Meter() {
+		this(0);
+	}
+	
+	/**
+	 * Create a new empty meter object, defaulting to 4/4 time and 4 tatums per sub beat at a given time.
+	 * 
+	 * @param time The starting time for this meter.
+	 */
+	public Meter(int time) {
 		tatums = new TreeSet<Tatum>();
 		hierarchies = new TreeSet<Hierarchy>();
-		hierarchies.add(new Hierarchy(4, 2, 4, 0));
+		hierarchies.add(new Hierarchy(4, 2, 4, 0, time));
 	}
 	
 	/**
@@ -97,6 +106,11 @@ public class Meter {
 		Hierarchy thisHierarchy = hierarchyIterator.next();
 		Hierarchy nextHierarchy = hierarchyIterator.hasNext() ? hierarchyIterator.next() : null;
 		
+		while (nextHierarchy != null && nextHierarchy.time <= thisTatum.time) {
+			thisHierarchy = nextHierarchy;
+			nextHierarchy = hierarchyIterator.hasNext() ? hierarchyIterator.next() : null;
+		}
+		
 		int tatumsPerSubBeat = thisHierarchy.tatumsPerSubBeat;
 		int tatumsPerBeat = tatumsPerSubBeat * thisHierarchy.subBeatsPerBeat;
 		int tatumsPerBar = tatumsPerBeat * thisHierarchy.beatsPerBar;
@@ -113,7 +127,7 @@ public class Meter {
 			nextTatum = tatumIterator.hasNext() ? tatumIterator.next() : null;
 			tatumNum++;
 			
-			if (nextHierarchy != null && nextHierarchy.time <= thisTatum.time) {
+			while (nextHierarchy != null && nextHierarchy.time <= thisTatum.time) {
 				// Go to next hierarchy
 				thisHierarchy = nextHierarchy;
 				nextHierarchy = hierarchyIterator.hasNext() ? hierarchyIterator.next() : null;
