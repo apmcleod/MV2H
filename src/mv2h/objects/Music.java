@@ -306,8 +306,8 @@ public class Music {
 	 * 
 	 * @param gt The ground truth Music object.
 	 * @param alignment The alignment to re-map with.
-	 * An alignment is a list containing, for each transcribed note list, the index of the ground
-	 * truth note list to which it is aligned, or -1 if it was not aligned with any ground truth note.
+	 * An alignment is a list containing, for each ground truth note list, the index of the transcription
+	 * note list to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 * 
 	 * @return A new Music object with the given alignment.
 	 */
@@ -331,7 +331,7 @@ public class Music {
 		}
 		
 		// Convert the metrical structure times
-		Meter newMeter = new Meter();
+		Meter newMeter = new Meter(Aligner.convertTime(0, gt, this, alignment));
 		for (Hierarchy h : meter.getHierarchies()) {
 			newMeter.addHierarchy(new Hierarchy(h.beatsPerBar, h.subBeatsPerBeat, h.tatumsPerSubBeat, h.anacrusisLengthTatums,
 					Aligner.convertTime(h.time, gt, this, alignment)));

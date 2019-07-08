@@ -967,5 +967,10 @@ Key 6 Maj 22000
 Key 8 Maj 0
 Key 11 Maj 16000
 Key 6 Maj 22000
-Hierarchy 4,2 6 a=0
+Hierarchy 4,2 6 a=0 0
+Hierarchy 4,2 6 a=0 16000
+Hierarchy 4,2 6 a=0 22000
+Hierarchy 4,2 6 a=0 0
+Hierarchy 4,2 6 a=0 16000
+Hierarchy 4,2 6 a=0 22000
 

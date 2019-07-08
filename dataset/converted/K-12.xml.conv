@@ -165,5 +165,7 @@ Tatum 11875
 Key 4 Maj 0
 Key 4 Maj 6000
 Key 4 Maj 9500
-Hierarchy 3,2 2 a=0
+Hierarchy 3,2 2 a=0 0
+Hierarchy 3,2 2 a=0 6000
+Hierarchy 3,2 2 a=0 9500
 

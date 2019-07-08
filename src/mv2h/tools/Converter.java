@@ -21,14 +21,24 @@ import mv2h.objects.meter.Tatum;
 public class Converter {
 	
 	/**
+	 * The number of milliseconds per beat to use.
+	 */
+	private static final int MS_PER_BEAT = 500;
+	
+	/**
 	 * The notes present in the XML piece.
 	 */
 	private List<Note> notes = new ArrayList<Note>();
 	
 	/**
-	 * The hierarchy of this piece.
+	 * The hierarchies of this piece.
 	 */
-	private Hierarchy hierarchy = null;
+	private List<Hierarchy> hierarchies = new ArrayList<Hierarchy>();
+	
+	/**
+	 * The tick of the starting time of each hierarchy.
+	 */
+	private List<Integer> hierarchyTicks = new ArrayList<Integer>();
 	
 	/**
 	 * A list of the key signatures of this piece.
@@ -72,6 +82,8 @@ public class Converter {
 		Scanner in = new Scanner(stream);
 		int lineNum = 0;
 		int ticksPerQuarterNote = 4;
+		int previousBar = -1;
+		boolean anacrusisHandled = false;
 		
 		while (in.hasNextLine()) {
 			lineNum++;
@@ -120,15 +132,8 @@ public class Converter {
 					
 					int tatumsPerSubBeat = ticksPerQuarterNote / subBeatsPerQuarterNote;
 					
-					Hierarchy newHierarchy = new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, hierarchy == null ? tick : 0);
-					if (hierarchy != null && (hierarchy.beatsPerBar != newHierarchy.beatsPerBar ||
-							hierarchy.subBeatsPerBeat != newHierarchy.subBeatsPerBeat ||
-							hierarchy.tatumsPerSubBeat != newHierarchy.tatumsPerSubBeat)) {
-						// TODO: Handle time changes
-						System.err.println("WARNING: Meter change detected (" + hierarchy + " to " + newHierarchy + ") on line " + lineNum + ": " + line);
-					} else {
-						hierarchy = newHierarchy;
-					}
+					hierarchyTicks.add(tick);
+					hierarchies.add(new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, 0, getTimeFromTick(tick)));
 					
 					// Key signature
 					int keyFifths = Integer.parseInt(attributes[7]);
@@ -144,6 +149,37 @@ public class Converter {
 					
 				case "chord":
 					// There are notes here
+					
+					// Handle anacrusis
+					if (!anacrusisHandled) {
+						int bar = Integer.parseInt(attributes[1]);
+						
+						if (previousBar == -1) {
+							// This is the first bar we've seen
+							previousBar = bar;
+							
+						} else if (previousBar != bar) {
+							// Ready to handle the anacrusis
+							
+							// Add a default 4/4 at time 0 if no hierarchy has been seen yet
+							if (hierarchies.isEmpty()) {
+								hierarchies.add(new Hierarchy(4, 2, ticksPerQuarterNote / 2, 0, 0));
+							}
+							
+							if (hierarchies.size() != 1) {
+								System.err.println("Warning: More than 1 time signature seen in the first bar.");
+							}
+							
+							// Duplicate mostRecent, but with correct anacrusis (tick % tatumsPerBar)
+							Hierarchy mostRecent = hierarchies.get(hierarchies.size() - 1);
+							int tatumsPerBar = mostRecent.beatsPerBar * mostRecent.subBeatsPerBeat * mostRecent.tatumsPerSubBeat;
+							hierarchies.set(hierarchies.size() - 1, new Hierarchy(mostRecent.beatsPerBar, mostRecent.subBeatsPerBeat,
+									mostRecent.tatumsPerSubBeat, tick % tatumsPerBar, mostRecent.time));
+							
+							anacrusisHandled = true;
+						}
+					}
+					
 					int duration = Integer.parseInt(attributes[6]);
 					lastTick = Math.max(tick + duration, lastTick);
 					
@@ -273,13 +309,27 @@ public class Converter {
 	}
 	
 	/**
-	 * Convert from XML tick to time, using 600ms per beat.
+	 * Convert from XML tick to time, using {@link #MS_PER_BEAT}.
 	 * 
 	 * @param tick The XML tick.
 	 * @return The time, in milliseconds.
 	 */
 	private int getTimeFromTick(int tick) {
-		return (int) Math.round(((double) tick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * 600);
+		if (hierarchies.isEmpty()) {
+			return tick;
+		}
+		
+		int i;
+		for (i = 0; i < hierarchies.size() - 1; i++) {
+			if (hierarchyTicks.get(i + 1) > tick) {
+				break;
+			}
+		}
+		
+		Hierarchy hierarchy = hierarchies.get(i);
+		int hierarchyTick = hierarchyTicks.get(i);
+		
+		return hierarchy.time + (int) Math.round(((double) tick - hierarchyTick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * MS_PER_BEAT);
 	}
 	
 	/**
@@ -319,7 +369,9 @@ public class Converter {
 			sb.append(key).append('\n');
 		}
 		
-		sb.append(hierarchy).append('\n');
+		for (Hierarchy hierarchy : hierarchies) {
+			sb.append(hierarchy).append('\n');
+		}
 		
 		return sb.toString();
 	}

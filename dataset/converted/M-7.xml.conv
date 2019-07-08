@@ -590,5 +590,10 @@ Key 0 Maj 10000
 Key 0 Maj 19500
 Key 0 Maj 28000
 Key 0 Maj 48000
-Hierarchy 4,2 2 a=0
+Hierarchy 4,2 2 a=4 0
+Hierarchy 4,2 2 a=0 7500
+Hierarchy 4,2 2 a=0 10000
+Hierarchy 4,2 2 a=0 19500
+Hierarchy 4,2 2 a=0 28000
+Hierarchy 4,2 2 a=0 48000
 

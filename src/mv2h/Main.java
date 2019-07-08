@@ -2,11 +2,13 @@ package mv2h;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import mv2h.objects.MV2H;
 import mv2h.objects.Music;
+import mv2h.objects.Note;
 import mv2h.tools.Aligner;
 
 /**
@@ -42,9 +44,20 @@ public class Main {
 	
 	/**
 	 * A flag representing if alignment should be performed. Defaults to <code>false</code>.
-	 * Can be set to <code>true</code> with the <code>-a</code> flag.
+	 * Can be set to <code>true</code> with the <code>-a</code> or <code>-A</code> flags.
+	 * <br>
+	 * @see #PRINT_ALIGNMENT
 	 */
 	private static boolean PERFORM_ALIGNMENT = false;
+	
+	/**
+	 * A flag representing if the alignment should be printed or not. Defaults to <code>false</code>.
+	 * Can be set to <code>true</code> with the <code>-A</code> flag (which also sets
+	 * {@link #PERFORM_ALIGNMENT} to true).
+	 * <br>
+	 * @see #PERFORM_ALIGNMENT
+	 */
+	private static boolean PRINT_ALIGNMENT = false;
 
 	/**
 	 * Run the program. There are 2 different modes.
@@ -54,6 +67,7 @@ public class Main {
 	 * <li><code>-g FILE</code> = The ground truth file.</li>
 	 * <li><code>-t FILE</code> = The transcription file.</li>
 	 * <li><code>-a</code> = Perform alignment.</li>
+	 * <li><code>-A</code> = Perform and print alignment.</li>
 	 * </ul>
 	 * <br>
 	 * 2. Get the means and standard deviations of many outputs of this program
@@ -86,6 +100,9 @@ public class Main {
 						case 'F':
 							checkFull();
 							return;
+							
+						case 'A':
+							PRINT_ALIGNMENT = true;
 							
 						case 'a':
 							DURATION_DELTA = 5;
@@ -160,13 +177,52 @@ public class Main {
 			
 			// Choose the best possible alignment out of all potential alignments.
 			MV2H best = new MV2H(0, 0, 0, 0, 0);
+			List<Integer> bestAlignment = new ArrayList<Integer>();
 		
 			for (List<Integer> alignment : Aligner.getPossibleAlignments(groundTruth, transcription)) {
 				MV2H candidate = groundTruth.evaluateTranscription(transcription.align(groundTruth, alignment));
 			
-				if (candidate.compareTo(best) > 0) {
+				if (candidate.compareTo(best) > 0) { 
 					best = candidate;
+					bestAlignment = alignment;
 				}
+			}
+			
+			if (PRINT_ALIGNMENT) {
+				System.out.println("ALIGNMENT");
+				System.out.println("=========");
+				
+				List<List<Note>> nonAlignedNotes = new ArrayList<List<Note>>();
+				
+				System.out.println("Aligned notes (transcribed -> ground truth):");
+				for (int noteIndex = 0; noteIndex < transcription.getNoteLists().size(); noteIndex++) {
+					int alignment = bestAlignment.indexOf(noteIndex);
+					
+					if (alignment == -1) {
+						nonAlignedNotes.add(transcription.getNoteLists().get(noteIndex));
+					} else {
+						System.out.println(transcription.getNoteLists().get(noteIndex) + " -> " +
+								(alignment == -1 ? "nothing." : groundTruth.getNoteLists().get(alignment)));
+					}
+				}
+				System.out.println();
+				
+				System.out.println("Non-aligned transcription notes:");
+				for (List<Note> notes : nonAlignedNotes) {
+					System.out.println(notes);
+				}
+				System.out.println();
+				
+				System.out.println("Non-aligned ground truth notes:");
+				for (int noteIndex = 0; noteIndex < groundTruth.getNoteLists().size(); noteIndex++) {
+					if (bestAlignment.get(noteIndex) == -1) {
+						System.out.println(groundTruth.getNoteLists().get(noteIndex));
+					}
+				}
+				System.out.println();
+				
+				System.out.println("MV2H");
+				System.out.println("====");
 			}
 			
 			System.out.println(best);
@@ -317,6 +373,7 @@ public class Main {
 		sb.append("ARGS:\n");
 		
 		sb.append("-a = Perform DTW alignment to evaluate non-aligned transcriptions.\n");
+		sb.append("-A = Perform and print the DTW alignment.\n");
 		
 		sb.append("-g FILE = Use the given FILE as the ground truth (defaults to std in).\n");
 		sb.append("-t FILE = Use the given FILE as the transcription (defaults to std in).\n");

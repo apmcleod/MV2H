@@ -446,26 +446,26 @@ Tatum 3719
 Tatum 3729
 Tatum 3740
 Tatum 3750
-Tatum 3760
+Tatum 3761
 Tatum 3771
-Tatum 3781
+Tatum 3782
 Tatum 3792
 Tatum 3802
 Tatum 3813
 Tatum 3823
-Tatum 3833
+Tatum 3834
 Tatum 3844
 Tatum 3854
 Tatum 3865
 Tatum 3875
-Tatum 3885
+Tatum 3886
 Tatum 3896
-Tatum 3906
+Tatum 3907
 Tatum 3917
 Tatum 3927
 Tatum 3938
 Tatum 3948
-Tatum 3958
+Tatum 3959
 Tatum 3969
 Tatum 3979
 Tatum 3990
@@ -1772,5 +1772,11 @@ Key 8 Maj 6000
 Key 8 Maj 11000
 Key 8 Maj 12375
 Key 8 Maj 16000
-Hierarchy 4,2 24 a=0
+Hierarchy 4,2 24 a=0 0
+Hierarchy 4,2 24 a=0 3719
+Hierarchy 4,2 24 a=0 4000
+Hierarchy 4,2 24 a=0 6000
+Hierarchy 4,2 24 a=0 11000
+Hierarchy 4,2 24 a=0 12375
+Hierarchy 4,2 24 a=0 16000
 
