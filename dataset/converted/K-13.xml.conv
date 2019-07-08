@@ -295,5 +295,8 @@ Key 9 Maj 0
 Key 9 Maj 1000
 Key 9 Maj 4000
 Key 9 Maj 7000
-Hierarchy 2,2 2 a=0
+Hierarchy 2,2 2 a=0 0
+Hierarchy 2,2 2 a=0 1000
+Hierarchy 2,2 2 a=0 4000
+Hierarchy 2,2 2 a=0 7000
 

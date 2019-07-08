@@ -124,11 +124,11 @@ Note 61 7167 7167 7500 3
 Note 56 6500 6500 6667 4
 Note 49 6667 6667 6833 4
 Note 51 6833 6833 7500 4
-Note 68 7500 7500 7833 1
-Note 68 7500 7500 7833 2
-Note 56 7500 7500 7833 3
-Note 60 7500 7500 7833 3
-Note 44 7833 7833 8000 3
+Note 68 7500 7500 8500 1
+Note 68 7500 7500 8500 2
+Note 56 7500 7500 8500 3
+Note 60 7500 7500 8500 3
+Note 44 8500 8500 9000 3
 Tatum 0
 Tatum 42
 Tatum 83
@@ -310,18 +310,19 @@ Tatum 7375
 Tatum 7417
 Tatum 7458
 Tatum 7500
-Tatum 7542
-Tatum 7583
 Tatum 7625
-Tatum 7667
-Tatum 7708
 Tatum 7750
-Tatum 7792
-Tatum 7833
 Tatum 7875
-Tatum 7917
-Tatum 7958
+Tatum 8000
+Tatum 8125
+Tatum 8250
+Tatum 8375
+Tatum 8500
+Tatum 8625
+Tatum 8750
+Tatum 8875
 Key 8 Maj 0
 Key 8 Maj 7500
-Hierarchy 2,3 4 a=0
+Hierarchy 2,3 4 a=12 0
+Hierarchy 3,2 2 a=0 7500
 
