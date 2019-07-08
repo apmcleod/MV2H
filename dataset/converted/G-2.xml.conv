@@ -602,7 +602,5 @@ Tatum 21375
 Tatum 21417
 Tatum 21458
 Key 0 min 0
-Key 0 min 4000
-Hierarchy 4,2 6 a=2 0
-Hierarchy 4,2 6 a=0 4000
+Hierarchy 4,2 6 a=0 0
 

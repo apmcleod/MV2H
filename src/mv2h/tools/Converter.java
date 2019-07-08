@@ -61,6 +61,18 @@ public class Converter {
 	private int firstTick = Integer.MAX_VALUE;
 	
 	/**
+	 * The bar of the previous line. This is kept updated until the anacrusis is handled.
+	 * <br>
+	 * @see #handleAnacrusis(int, int, int, int)
+	 */
+	private int previousBar = -1;
+	
+	/**
+	 * The number of ticks per quarter note. 1 tick is 1 tatum. Defaults to 4.
+	 */
+	private int ticksPerQuarterNote = 4;
+	
+	/**
 	 * Run the program, reading the MusicXMLParser output from standard in and printing to
 	 * standard out.
 	 * 
@@ -81,8 +93,6 @@ public class Converter {
 	public Converter(InputStream stream) {
 		Scanner in = new Scanner(stream);
 		int lineNum = 0;
-		int ticksPerQuarterNote = 4;
-		int previousBar = -1;
 		boolean anacrusisHandled = false;
 		
 		while (in.hasNextLine()) {
@@ -132,19 +142,34 @@ public class Converter {
 					
 					int tatumsPerSubBeat = ticksPerQuarterNote / subBeatsPerQuarterNote;
 					
-					hierarchyTicks.add(tick);
-					hierarchies.add(new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, 0, getTimeFromTick(tick)));
+					// Add the new time signature (if it is new)
+					Hierarchy mostRecent = hierarchies.isEmpty() ? null : hierarchies.get(hierarchies.size() - 1);
+					if (mostRecent == null || mostRecent.beatsPerBar != beatsPerBar ||
+							mostRecent.subBeatsPerBeat != subBeatsPerBeat || mostRecent.tatumsPerSubBeat != tatumsPerSubBeat) {
+						hierarchyTicks.add(tick);
+						hierarchies.add(new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, 0, getTimeFromTick(tick)));
+					}
 					
 					// Key signature
 					int keyFifths = Integer.parseInt(attributes[7]);
 					String keyMode = attributes[8];
 					
-					keys.add(new Key(((7 * keyFifths) + 144) % 12, keyMode.equalsIgnoreCase("Major"), getTimeFromTick(tick)));
+					int tonic = ((7 * keyFifths) + 144) % 12;
+					boolean mode = keyMode.equalsIgnoreCase("Major");
+					
+					// Add the new key (if it is new)
+					Key mostRecentKey = keys.isEmpty() ? null : keys.get(keys.size() - 1);
+					if (mostRecentKey == null || mostRecentKey.tonic != tonic || mostRecentKey.isMajor != mode) {
+						keys.add(new Key(tonic, mode, getTimeFromTick(tick)));
+					}
 					
 					break;
 					
 				case "rest":
-					// Do nothing
+					// Handle anacrusis
+					if (!anacrusisHandled) {
+						anacrusisHandled = handleAnacrusis(Integer.parseInt(attributes[1]), tick);
+					}
 					break;
 					
 				case "chord":
@@ -152,32 +177,7 @@ public class Converter {
 					
 					// Handle anacrusis
 					if (!anacrusisHandled) {
-						int bar = Integer.parseInt(attributes[1]);
-						
-						if (previousBar == -1) {
-							// This is the first bar we've seen
-							previousBar = bar;
-							
-						} else if (previousBar != bar) {
-							// Ready to handle the anacrusis
-							
-							// Add a default 4/4 at time 0 if no hierarchy has been seen yet
-							if (hierarchies.isEmpty()) {
-								hierarchies.add(new Hierarchy(4, 2, ticksPerQuarterNote / 2, 0, 0));
-							}
-							
-							if (hierarchies.size() != 1) {
-								System.err.println("Warning: More than 1 time signature seen in the first bar.");
-							}
-							
-							// Duplicate mostRecent, but with correct anacrusis (tick % tatumsPerBar)
-							Hierarchy mostRecent = hierarchies.get(hierarchies.size() - 1);
-							int tatumsPerBar = mostRecent.beatsPerBar * mostRecent.subBeatsPerBeat * mostRecent.tatumsPerSubBeat;
-							hierarchies.set(hierarchies.size() - 1, new Hierarchy(mostRecent.beatsPerBar, mostRecent.subBeatsPerBeat,
-									mostRecent.tatumsPerSubBeat, tick % tatumsPerBar, mostRecent.time));
-							
-							anacrusisHandled = true;
-						}
+						anacrusisHandled = handleAnacrusis(Integer.parseInt(attributes[1]), tick);
 					}
 					
 					int duration = Integer.parseInt(attributes[6]);
@@ -281,6 +281,44 @@ public class Converter {
 			System.err.println("WARNING: Tie never ended for note " + note + ". Adding note as untied.");
 			notes.add(note);
 		}
+	}
+	
+	/**
+	 * Handle any anacrusis, if possible. First, detect if at least 1 bar has finished. If it has,
+	 * check how long the previous bar was, and set the first anacrusis according to that.
+	 * 
+	 * @param bar The bar number of the current line. This will be compared to {@link #previousBar}
+	 * to check if a bar has just finished.
+	 * @param tick The tick of the current line.
+	 * @return True if the anacrusis has now been handled. False otherwise.
+	 */
+	private boolean handleAnacrusis(int bar, int tick) {
+		if (previousBar == -1) {
+			// This is the first bar we've seen
+			previousBar = bar;
+			
+		} else if (previousBar != bar) {
+			// Ready to handle the anacrusis
+			
+			// Add a default 4/4 at time 0 if no hierarchy has been seen yet
+			if (hierarchies.isEmpty()) {
+				hierarchies.add(new Hierarchy(4, 2, ticksPerQuarterNote / 2, 0, 0));
+			}
+			
+			if (hierarchies.size() != 1) {
+				System.err.println("Warning: More than 1 time signature seen in the first bar.");
+			}
+			
+			// Duplicate mostRecent, but with correct anacrusis (tick % tatumsPerBar)
+			Hierarchy mostRecent = hierarchies.get(hierarchies.size() - 1);
+			int tatumsPerBar = mostRecent.beatsPerBar * mostRecent.subBeatsPerBeat * mostRecent.tatumsPerSubBeat;
+			hierarchies.set(hierarchies.size() - 1, new Hierarchy(mostRecent.beatsPerBar, mostRecent.subBeatsPerBeat,
+					mostRecent.tatumsPerSubBeat, tick % tatumsPerBar, mostRecent.time));
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
