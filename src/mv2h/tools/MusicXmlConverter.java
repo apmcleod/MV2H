@@ -13,8 +13,8 @@ import mv2h.objects.meter.Hierarchy;
 import mv2h.objects.meter.Tatum;
 
 /**
- * The <code>MusicXMLConverter</code> class is used to convert a given output from the MusicXMLParser
- * into a format that can be read by the MV2H package (standard out).
+ * The <code>MusicXmlConverter</code> class is used to convert a given output from the MusicXMLParser
+ * into a format that can be read by the MV2H package (using the toString() method).
  * 
  * @author Andrew McLeod
  */
@@ -67,7 +67,7 @@ public class MusicXmlConverter extends Converter {
 	private int ticksPerQuarterNote = 4;
 
 	/**
-	 * Create a new MusicXMLConverter object by parsing the input from the MusicXMLParser.
+	 * Create a new MusicXmlConverter object by parsing the input from the MusicXMLParser.
 	 * <br>
 	 * This method contains the main program logic, and printing is handled by
 	 * {@link #toString()}.

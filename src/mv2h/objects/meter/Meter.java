@@ -209,6 +209,15 @@ public class Meter {
 	
 	@Override
 	public String toString() {
-		return "Meters " + hierarchies + " Tatums " + tatums;
+		StringBuilder sb = new StringBuilder();
+		
+		for (Hierarchy h : hierarchies) {
+			sb.append(h.toString()).append('\n');
+		}
+		for (Tatum t : tatums) {
+			sb.append(t.toString()).append('\n');
+		}
+		
+		return sb.toString();
 	}
 }

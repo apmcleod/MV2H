@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.sound.midi.InvalidMidiDataException;
+
 /**
  * The <code>Converter</code> class is used to convert another file format into
  * a format that can be read by the MV2H package (standard out).
@@ -109,10 +111,8 @@ public class Converter {
 				argumentError("-i FILE is required with MIDI files (-m).");
 			}
 			try {
-				InputStream is = new FileInputStream(inFile);
-				converter = new MidiConverter(is);
-				is.close();
-			} catch (IOException e) {
+				converter = new MidiConverter(inFile);
+			} catch (IOException | InvalidMidiDataException e) {
 				System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
 				System.exit(1);
 			}
