@@ -53,7 +53,11 @@ An output file can also be specified with -o FILE.
 2. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
 
-Chord symbols will not be parsed, and all key signatures will be major.
+Chord symbols will not be parsed.
+
+##### Additional Args
+* `-a INT` = Set an anacrusis (pick-up bar) length of INT sub beats.
+* `-T` = Use tracks as ground truth voices rather than channels.
 
 ### Averaging Multiple Evaluations
 To get the averages of many MV2H evaluations:
