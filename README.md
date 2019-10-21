@@ -17,6 +17,9 @@ If you use the metric, please cite it:
 To compile the code, simply run `make` in the base directory.
 
 ## Usage
+* The standard text-based file format is described [here](#File-Format).
+* Converters for use with other file formats (such as MusicXML and MIDI) are described [here](#Other-File-Formats).
+
 ### Non-aligned Data
 Use the `-a` flag to evaluate a non-time-aligned transcription:
 * `java -cp bin mv2h.Main -g gt.txt -t transcription.txt -a`
@@ -26,7 +29,6 @@ To evaluate a time-aligned transcription and ground truth:
 * `java -cp bin mv2h.Main -g gt.txt -t transcription.txt`
 
 ### Other File Formats
-The standard text-based file format is described [below](#File-Format).
 #### MusicXML
 1. Convert MusicXML into a text-based format:  
 `./MusicXMLParser/MusicXMLToFmt1x gt.xml gt_xml.txt`  
