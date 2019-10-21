@@ -28,9 +28,14 @@ To evaluate a time-aligned transcription and ground truth:
 ### Other File Formats
 The standard text-based file format is described [below](#File-Format).
 #### MusicXML
-1. Use the included C++ converter with `MusicXMLParser/MusicXMLToFmt1x in.xml out.txt` to convert a MusicXML file into a text-based format. (It must be compiled first using `./conpile.sh` in the `MusicXMLParser` directory.)
-2. Use `java -cp bin mv2h.tools.Converter <out.txt >converted.txt` to convert that text format into the text format used by mv2h. The tempo defaults to 500 ms per MusicXML beat.
-3. Score with alignment using the `-a` flag:
+1. Convert MusicXML into a text-based format:  
+`./MusicXMLParser/MusicXMLToFmt1x gt.xml gt_xml.txt`  
+(The C++ converter must be compiled first using `./compile.sh` in the `MusicXMLParser` directory.)
+
+2. Convert that text-based format into the MV2H format:  
+`java -cp bin mv2h.tools.Converter <gt_xml.txt >gt_converted.txt`
+
+3. Score with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
 
 See [Dataset](#dataset) for examples.
@@ -83,8 +88,7 @@ This represents a tatum pulse at the given time (an integer, in milliseconds).
  
  
  * `Hierarchy bpb,sbpb tpsb a=al [time]`  
-This represents the metrical hierarchy, where bpb, sbpb, tpsb, and al are all integers representing the beats per bar, sub beats per beat, tatums per sub beat, and anacrusis length (in tatums) respectively. The time is in milliseconds, and assumed to be 0 if not given.
-
+This represents the metrical hierarchy, where bpb, sbpb, tpsb, and al are all integers representing the beats per bar, sub beats per beat, tatums per sub beat, and anacrusis length (in tatums) respectively. The time is in milliseconds, and assumed to be 0 if not given.  
 Beginning a new hierarchy on a non-downbeat, while not recommended, is supported. The previous downbeat, and start to the most recent beat and sub beat are saved, and the tatum position is updated as in the new bar. Thus, 1 beat of a 2/4 bar, followed by 3 beats of a 4/4 bar with a 3 beat anacrusis, is equivalent to a single 4/4 bar.
  
  * `Key tonic maj/min [time]`  
