@@ -14,41 +14,37 @@ If you use the metric, please cite it:
 }
 ```
 
-For the original version of the code, as it was for the ISMIR 2018 submission, see the tag [v1.0](https://github.com/apmcleod/MV2H/releases/tag/v1.0).
+To compile the code, simply run `make` in the base directory.
 
+## Usage
 ### Non-aligned Data
-Note that while the paper and the code on the master branch only works on time-aligned input and ground truth pairs, the code in the regress branch uses Dynamic Time Warping to automatically align non-aligned input and ground truth. For now, please still cite the original publication if you use this new version.
+Use the `-a` flag to evaluate a non-time-aligned transcription:
+* `java -cp bin mv2h.Main -g gt.txt -t transcription.txt -a`
 
-## Project Overview
-The goal of this project is to create an automatic, joint, quantitative metric for complete transcription of polyphonic music. This branch includes code to evaluate a non-aligned score and ground truth.
+### Aligned Data
+To evaluate a time-aligned transcription and ground truth:
+* `java -cp bin mv2h.Main -g gt.txt -t transcription.txt`
 
-### Using with Non-aligned Data
-The program will perform alignment itself if used with the `-a` flag. Note that this sets the time window for onset, offset, and groupings to 0ms (since they should be aligned). For the time information in the input text files (particularly the ground truth), you should use some reasonable tempo, like 100 BMP.
+### Other File Formats
+The standard text-based file format is described [below](#File-Format).
+#### MusicXML
+1. Use the included C++ converter with `MusicXMLParser/MusicXMLToFmt1x in.xml out.txt` to convert a MusicXML file into a text-based format. (It must be compiled first using `./conpile.sh` in the `MusicXMLParser` directory.)
+2. Use `java -cp bin mv2h.tools.Converter <out.txt >converted.txt` to convert that text format into the text format used by mv2h. The tempo defaults to 500 ms per MusicXML beat.
+3. Score with alignment using the `-a` flag:
+`java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
 
-The dataset directory contains files generated when evaluating the transcriptions from the MusicXML files of the following paper:
+See [Dataset](#dataset) for examples.
 
-```
-Andrea Cogliati, Zhiyao Duan, A metric for Music Notation Transcription Accuracy, Proc. of International Society for Music Information Retrieval Conference (ISMIR), Suzhou, China, Oct 2017.
-```
+#### MIDI
+Development in progress.
 
-For details on this directory, or how to score MusicXML files with metric, see the MusicXML section below.
+### Averaging Multiple Evaluations
+To get the averages of many MV2H evaluations:
+1. Concatenate the evaluations into a single txt file: `cat res*.txt >all_results.txt`
+2. Use the `-F` flag: `java -cp bin mv2h.Main -F <all_results.txt`
 
-## Installing
-The java files can all be compiled into class files in a bin directory using the Makefile
-included with the project with the following command: `$ make`.
 
-## Running
-Run the program one of the following ways:
-* To evaluate a transcription: `$ java -cp bin mv2h.Main -g FILE -t FILE`
-* To combine a number of evaluations: `$ java -cp bin mv2h.Main -F`
-
-ARGS:
- * `-g FILE` = Use the given FILE as ground truth.
- * `-t FILE` = Use the given FILE as the transcription.
- * `-a` = Perform alignment between the ground truth and the transcription.
- * `-F` = Combine many evaluations from standard in, where standard in contains many outputs created by using -g and -t.
-
-### Examples
+## Examples
 The examples directory contains two example transcriptions of an ground truth. To perform evaluation, run the following commands and you should get the results shown:
 
  * `$ java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`  
@@ -97,20 +93,19 @@ This is a string representing the key signature, where tonic is an integer betwe
  * `Chord time chord`  
 Representing a chord, where time is the start time of the chord, in milliseconds, and chord is any string representing the chord.
 
-For any duplicate times, only the most last given chord, key, or hierarchy are saved. Duplicate tatums are ignored.
-
-## MusicXML
-To score MusicXML files:
-* First, use the included C++ converter with `MusicXMLParser/MusicXMLToFmt1x in.xml out.txt` to convert a MusicXML file into a text-based format.
-* Next, use `java -cp bin mv2h.tools.Converter <out.txt >converted.txt` to convert that text format into the text format used by mv2h (reads and writes with std in and out). The tempo defaults to 500 ms per MusicXML beat.
-* Use the standard mv2h as above with the `-a` flag.
+For any duplicate times, only the last given chord, key, or hierarchy are saved. Duplicate tatums are ignored.
 
 
-The dataset directory contains files generated using the above process on the dataset from the paper:
+## Dataset
+The dataset directory contains files generated using the [MusicXML](#MusicXML) process on the dataset from the paper:
 ```
 Andrea Cogliati, Zhiyao Duan, A metric for Music Notation Transcription Accuracy, Proc. of International Society for Music Information Retrieval Conference (ISMIR), Suzhou, China, Oct 2017.
 ```
 The original music XML files are available [here](https://github.com/AndreaCogliati/MetricForScoreSimilarity).
 * dataset/parsed-xml contains the outputs of the C++ converter.
-* dataset/converted contains the outputs of my java Converter tool.
+* dataset/converted contains the outputs of the java Converter tool.
 * dataset/outs contains the resulting evaluation scores for each transcription.
+
+
+## Old Versions
+- For the original version of the code, as it was for the ISMIR 2018 submission, see the tag [v1.0](https://github.com/apmcleod/MV2H/releases/tag/v1.0).
