@@ -35,15 +35,25 @@ To evaluate a time-aligned transcription and ground truth:
 (The C++ converter must be compiled first using `./compile.sh` in the `MusicXMLParser` directory.)
 
 2. Convert that text-based format into the MV2H format:  
-`java -cp bin mv2h.tools.Converter <gt_xml.txt >gt_converted.txt`
+`java -cp bin mv2h.tools.Converter -x <gt_xml.txt >gt_converted.txt`  
+Input and output files can also be specified with -i FILE and -o FILE. 
 
-3. Score with alignment using the `-a` flag:  
+3. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
+
+Chord symbols will not be parsed, and all key signatures will be major.
 
 See [Dataset](#dataset) for examples.
 
 #### MIDI
-Development in progress.
+1. Convert a MIDI file into the MV2H format:  
+`java -cp bin mv2h.tools.Converter -m -i gt.mid >gt_converted.txt`  
+An output file can also be specified with -o FILE. 
+
+2. Evaluate with alignment using the `-a` flag:  
+`java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
+
+Chord symbols will not be parsed, and all key signatures will be major.
 
 ### Averaging Multiple Evaluations
 To get the averages of many MV2H evaluations:
