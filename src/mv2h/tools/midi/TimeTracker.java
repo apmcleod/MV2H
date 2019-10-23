@@ -241,7 +241,8 @@ public class TimeTracker {
     	}
     	
     	// Add last tatums
-    	for (Tatum tatum : nodes.get(nodes.size() - 1).getSubBeatsUntil(propFinished, lastTick)) {
+    	TimeTrackerNode lastNode = nodes.get(nodes.size() - 1);
+    	for (Tatum tatum : lastNode.getSubBeatsUntil(propFinished, lastNode.getTimeAtTick(lastTick, PPQ))) {
     		meter.addTatum(tatum);
     	}
     	
