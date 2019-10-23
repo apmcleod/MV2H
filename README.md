@@ -36,7 +36,7 @@ To evaluate a time-aligned transcription and ground truth:
 
 2. Convert that text-based format into the MV2H format:  
 `java -cp bin mv2h.tools.Converter -x <gt_xml.txt >gt_converted.txt`  
-Input and output files can also be specified with -i FILE and -o FILE. 
+Input and output files can also be specified with `-i FILE` and `-o FILE`. 
 
 3. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
@@ -48,7 +48,7 @@ See [Dataset](#dataset) for examples.
 #### MIDI
 1. Convert a MIDI file into the MV2H format:  
 `java -cp bin mv2h.tools.Converter -m -i gt.mid >gt_converted.txt`  
-An output file can also be specified with -o FILE. 
+An output file can also be specified with `-o FILE`. 
 
 2. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
@@ -68,7 +68,7 @@ To get the averages of many MV2H evaluations:
 ## Examples
 The examples directory contains two example transcriptions of an ground truth. To perform evaluation, run the following commands and you should get the results shown:
 
- * `$ java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`  
+ * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`  
 Multi-pitch: 0.9302325581395349  
 Voice: 0.8125  
 Meter: 0.7368421052631577  
@@ -76,7 +76,7 @@ Value: 0.9642857142857143
 Harmony: 1.0  
 MV2H: 0.8887720755376813  
  
- * `$ java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`  
+ * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`  
 Multi-pitch: 0.7727272727272727  
 Voice: 1.0  
 Meter: 1.0  
@@ -84,7 +84,7 @@ Value: 1.0
 Harmony: 0.5  
 MV2H: 0.8545454545454545  
  
- * `$ java -cp bin mv2h.Main -F <examples/FullOut.txt`  
+ * `java -cp bin mv2h.Main -F <examples/FullOut.txt`  
 Multi-pitch: mean=0.8514799154334038 stdev=0.0787526427061301  
 Voice: mean=0.90625 stdev=0.09375  
 Meter: mean=0.8684210526315789 stdev=0.13157894736842105  
