@@ -1,76 +1,24 @@
 package mv2h.tools;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
 
-import mv2h.objects.Note;
-import mv2h.objects.harmony.Key;
-import mv2h.objects.meter.Hierarchy;
-import mv2h.objects.meter.Tatum;
+import javax.sound.midi.InvalidMidiDataException;
 
 /**
- * The <code>Converter</code> class is used to convert a given output from the MusicXMLParser
- * (read from standard in) into a format that can be read by the MV2H package (standard out).
+ * The <code>Converter</code> class is used to convert another file format into
+ * a format that can be read by the MV2H package (standard out).
  * 
  * @author Andrew McLeod
  */
 public class Converter {
-	
 	/**
-	 * The number of milliseconds per beat to use.
+	 * The number of milliseconds per beat by default.
 	 */
-	private static final int MS_PER_BEAT = 500;
-	
-	/**
-	 * The notes present in the XML piece.
-	 */
-	private List<Note> notes = new ArrayList<Note>();
-	
-	/**
-	 * The hierarchies of this piece.
-	 */
-	private List<Hierarchy> hierarchies = new ArrayList<Hierarchy>();
-	
-	/**
-	 * The tick of the starting time of each hierarchy.
-	 */
-	private List<Integer> hierarchyTicks = new ArrayList<Integer>();
-	
-	/**
-	 * A list of the key signatures of this piece.
-	 */
-	private List<Key> keys = new ArrayList<Key>();
-	
-	/**
-	 * A list of the notes for which there hasn't yet been an offset.
-	 */
-	private List<Note> unfinishedNotes = new ArrayList<Note>();
-	
-	/**
-	 * The last tick of the piece.
-	 */
-	private int lastTick = 0;
-	
-	/**
-	 * The first tick of the piece.
-	 */
-	private int firstTick = Integer.MAX_VALUE;
-	
-	/**
-	 * The bar of the previous line. This is kept updated until the anacrusis is handled.
-	 * <br>
-	 * @see #handleAnacrusis(int, int, int, int)
-	 */
-	private int previousBar = -1;
-	
-	/**
-	 * The number of ticks per quarter note. 1 tick is 1 tatum. Defaults to 4.
-	 */
-	private int ticksPerQuarterNote = 4;
+	public static final int MS_PER_BEAT = 500;
 	
 	/**
 	 * Run the program, reading the MusicXMLParser output from standard in and printing to
@@ -79,390 +27,183 @@ public class Converter {
 	 * @param args Unused command line arguments.
 	 */
 	public static void main(String[] args) {
-		System.out.println(new Converter(System.in));
-	}
-	
-	/**
-	 * Create a new Converter object by parsing the input from the MusicXMLParser.
-	 * <br>
-	 * This method contains the main program logic, and printing is handled by
-	 * {@link #toString()}.
-	 * 
-	 * @param stream The MusicXMLParser output to convert.
-	 */
-	public Converter(InputStream stream) {
-		Scanner in = new Scanner(stream);
-		int lineNum = 0;
-		boolean anacrusisHandled = false;
+		boolean useXml = false;
+		boolean useMidi = false;
+		int numToUse = 0;
+		int anacrusis = 0;
+		boolean useChannel = true;
 		
-		while (in.hasNextLine()) {
-			lineNum++;
-			String line = in.nextLine();
-			
-			// Skip comment lines
-			if (line.startsWith("//")) {
-				continue;
-			}
-			
-			String[] attributes = line.split("\t");
-			if (attributes.length < 5) {
-				// Error if fewer than 5 columns
-				System.err.println("WARNING: Line type not found. Skipping line " + lineNum + ": " + line);
-				continue;
-			}
-			
-			int tick = Integer.parseInt(attributes[0]);
-			int voice = Integer.parseInt(attributes[4]);
-			
-			lastTick = Math.max(tick, lastTick);
-			firstTick = Math.min(tick, firstTick);
-			
-			// Switch for different types of lines
-			switch (attributes[5]) {
-				// Attributes is the base line type describing time signature, tempo, etc.
-				case "attributes":
-					ticksPerQuarterNote = Integer.parseInt(attributes[6]);
-					
-					// Time signature
-					int tsNumerator = Integer.parseInt(attributes[9]);
-					int tsDenominator = Integer.parseInt(attributes[10]);
-					
-					int beatsPerBar = tsNumerator;
-					int subBeatsPerBeat = 2;
-					
-					int subBeatsPerQuarterNote = tsDenominator / 2;
-					
-					// Check for compound meter
-					if (beatsPerBar % 3 == 0 && beatsPerBar > 3) {
-						beatsPerBar /= 3;
-						subBeatsPerBeat = 3;
-						
-						subBeatsPerQuarterNote = tsDenominator / 4;
+		File inFile = null;
+		File outFile = null;
+		
+		// No args given
+		if (args.length == 0) {
+			argumentError("No arguments given");
+		}
+		
+		for (int i = 0; i < args.length; i++) {
+			switch (args[i].charAt(0)) {
+				// ARGS
+				case '-':
+					if (args[i].length() == 1) {
+						argumentError("Unrecognized option: " + args[i]);
 					}
 					
-					int tatumsPerSubBeat = ticksPerQuarterNote / subBeatsPerQuarterNote;
-					
-					// Add the new time signature (if it is new)
-					Hierarchy mostRecent = hierarchies.isEmpty() ? null : hierarchies.get(hierarchies.size() - 1);
-					if (mostRecent == null || mostRecent.beatsPerBar != beatsPerBar ||
-							mostRecent.subBeatsPerBeat != subBeatsPerBeat || mostRecent.tatumsPerSubBeat != tatumsPerSubBeat) {
-						hierarchyTicks.add(tick);
-						hierarchies.add(new Hierarchy(beatsPerBar, subBeatsPerBeat, tatumsPerSubBeat, 0, getTimeFromTick(tick)));
-					}
-					
-					// Key signature
-					int keyFifths = Integer.parseInt(attributes[7]);
-					String keyMode = attributes[8];
-					
-					int tonic = ((7 * keyFifths) + 144) % 12;
-					boolean mode = keyMode.equalsIgnoreCase("Major");
-					
-					// Add the new key (if it is new)
-					Key mostRecentKey = keys.isEmpty() ? null : keys.get(keys.size() - 1);
-					if (mostRecentKey == null || mostRecentKey.tonic != tonic || mostRecentKey.isMajor != mode) {
-						keys.add(new Key(tonic, mode, getTimeFromTick(tick)));
-					}
-					
-					break;
-					
-				case "rest":
-					// Handle anacrusis
-					if (!anacrusisHandled) {
-						anacrusisHandled = handleAnacrusis(Integer.parseInt(attributes[1]), tick);
-					}
-					break;
-					
-				case "chord":
-					// There are notes here
-					
-					// Handle anacrusis
-					if (!anacrusisHandled) {
-						anacrusisHandled = handleAnacrusis(Integer.parseInt(attributes[1]), tick);
-					}
-					
-					int duration = Integer.parseInt(attributes[6]);
-					lastTick = Math.max(tick + duration, lastTick);
-					
-					int tieInfo = Integer.parseInt(attributes[7]);
-					int numNotes = Integer.parseInt(attributes[8]);
-					
-					// Get all of the pitches
-					int[] pitches = new int[numNotes];
-					for (int i = 0; i < numNotes; i++) {
-						try {
-							pitches[i] = getPitchFromString(attributes[9 + i]);
-						} catch (IOException e) {
-							System.err.println("WARNING: " + e.getMessage() + " Skipping line " + lineNum + ": " + line);
-							continue;
-						}
-					}
-					
-					// Handle each pitch
-					for (int pitch : pitches) {
-						switch (tieInfo) {
-							// No tie
-							case 0:
-								notes.add(new Note(pitch, getTimeFromTick(tick), getTimeFromTick(tick), getTimeFromTick(tick + duration), voice));
-								break;
-								
-							// Tie out
-							case 1:
-								unfinishedNotes.add(new Note(pitch, getTimeFromTick(tick), getTimeFromTick(tick), getTimeFromTick(tick + duration), voice));
-								break;
-								
-							// Tie in
-							case 2:
-								try {
-									Note matchedNote = findAndRemoveUnfinishedNote(pitch, getTimeFromTick(tick), voice);
-									notes.add(new Note(pitch, matchedNote.onsetTime, matchedNote.valueOnsetTime, getTimeFromTick(tick), voice));
-								} catch (IOException e) {
-									System.err.println("WARNING: " + e.getMessage() + " Adding tied note as new note " + lineNum + ": " + line);
-									notes.add(new Note(pitch, getTimeFromTick(tick), getTimeFromTick(tick), getTimeFromTick(tick + duration), voice));
-								}
-								break;
-								
-							// Tie in and out
-							case 3:
-								try {
-									Note matchedNote = findAndRemoveUnfinishedNote(pitch, getTimeFromTick(tick), voice);
-									unfinishedNotes.add(new Note(pitch, matchedNote.onsetTime, matchedNote.valueOnsetTime, getTimeFromTick(tick + duration), voice));
-								} catch (IOException e) {
-									System.err.println("WARNING: " + e.getMessage() + " Skipping note on line " + lineNum + ": " + line);
-									unfinishedNotes.add(new Note(pitch, getTimeFromTick(tick), getTimeFromTick(tick), getTimeFromTick(tick + duration), voice));
-								}
-								break;
-								
-							// ???
-							default:
-								System.err.println("WARNING: Unknown tie type " + tieInfo + ". Skipping line " + lineNum + ": " + line);
-								break;
-						}
+					switch (args[i].charAt(1)) {
+						// midi
+						case 'm':
+							if (!useMidi) {
+								numToUse++;
+								useMidi = true;
+							}
+							break;
+							
+						// musicxml
+						case 'x':
+							if (!useXml) {
+								numToUse++;
+								useXml = true;
+							}
+							break;
+							
+						// Use track
+						case 't':
+							useChannel = false;
+							break;
+							
+						// anacrusis
+						case 'a':
+							i++;
+							if (args.length <= i) {
+								argumentError("No anacrusis length given with -a.");
+							}
+							try {
+								anacrusis = Integer.parseInt(args[i]);
+							} catch (NumberFormatException e) {
+								argumentError("Anacrusis must be an integer.");
+							}
+							break;
+							
+						// input file
+						case 'i':
+							i++;
+							if (args.length <= i) {
+								argumentError("No input file given with -i.");
+							}
+							if (inFile != null) {
+								argumentError("-i FILE can only be used once.");
+							}
+							inFile = new File(args[i]);
+							if (!inFile.exists()) {
+								argumentError("Input file " + inFile + " does not exist.");
+							}
+							break;
+							
+						// output file
+						case 'o':
+							i++;
+							if (args.length <= i) {
+								argumentError("No output file given with -o.");
+							}
+							if (outFile != null) {
+								argumentError("-o FILE can only be used once.");
+							}
+							outFile = new File(args[i]);
+							break;
+							
+						// Error
+						default:
+							argumentError("Unrecognized option: " + args[i]);
 					}
 					break;
 					
-				case "tremolo-m":
-					duration = Integer.parseInt(attributes[6]);
-					lastTick = Math.max(tick + duration, lastTick);
-					
-					numNotes = Integer.parseInt(attributes[8]);
-					
-					pitches = new int[numNotes];
-					for (int i = 0; i < numNotes; i++) {
-						try {
-							pitches[i] = getPitchFromString(attributes[9 + i]);
-						} catch (IOException e) {
-							System.err.println("WARNING: " + e.getMessage() + " Skipping line " + lineNum + ": " + line);
-							continue;
-						}
-					}
-					
-					for (int pitch : pitches) {
-						// TODO: Decide how many notes to add here. i.e., default to eighth notes for now?
-						int ticksPerTremolo = ticksPerQuarterNote / 2;
-						int numTremolos = duration / ticksPerTremolo;
-						
-						
-						for (int i = 0; i < numTremolos; i++) {
-							notes.add(new Note(pitch, getTimeFromTick(tick + ticksPerTremolo * i), getTimeFromTick(tick + ticksPerTremolo * i), getTimeFromTick(tick + ticksPerTremolo * (i + 1)), voice));
-						}
-					}
-					break;
-					
+				// Error
 				default:
-					System.err.println("WARNING: Unrecognized line type. Skipping line " + lineNum + ": " + line);
-					continue;
+					argumentError("Unrecognized option: " + args[i]);
 			}
 		}
 		
-		in.close();
-		
-		// Check for any unfinished notes (because of ties out).
-		for (Note note : unfinishedNotes) {
-			System.err.println("WARNING: Tie never ended for note " + note + ". Adding note as untied.");
-			notes.add(note);
-		}
-	}
-	
-	/**
-	 * Handle any anacrusis, if possible. First, detect if at least 1 bar has finished. If it has,
-	 * check how long the previous bar was, and set the first anacrusis according to that.
-	 * 
-	 * @param bar The bar number of the current line. This will be compared to {@link #previousBar}
-	 * to check if a bar has just finished.
-	 * @param tick The tick of the current line.
-	 * @return True if the anacrusis has now been handled. False otherwise.
-	 */
-	private boolean handleAnacrusis(int bar, int tick) {
-		if (previousBar == -1) {
-			// This is the first bar we've seen
-			previousBar = bar;
-			
-		} else if (previousBar != bar) {
-			// Ready to handle the anacrusis
-			
-			// Add a default 4/4 at time 0 if no hierarchy has been seen yet
-			if (hierarchies.isEmpty()) {
-				hierarchies.add(new Hierarchy(4, 2, ticksPerQuarterNote / 2, 0, 0));
-			}
-			
-			if (hierarchies.size() != 1) {
-				System.err.println("Warning: More than 1 time signature seen in the first bar.");
-			}
-			
-			// Duplicate mostRecent, but with correct anacrusis (tick % tatumsPerBar)
-			Hierarchy mostRecent = hierarchies.get(hierarchies.size() - 1);
-			int tatumsPerBar = mostRecent.beatsPerBar * mostRecent.subBeatsPerBeat * mostRecent.tatumsPerSubBeat;
-			hierarchies.set(hierarchies.size() - 1, new Hierarchy(mostRecent.beatsPerBar, mostRecent.subBeatsPerBeat,
-					mostRecent.tatumsPerSubBeat, tick % tatumsPerBar, mostRecent.time));
-			
-			return true;
+		if (numToUse != 1) {
+			argumentError("Exactly 1 format is required");
 		}
 		
-		return false;
-	}
-	
-	/**
-	 * Find a tied out note that matches a new tied in note, return it, and remove it from
-	 * {@link #unfinishedNotes}.
-	 * 
-	 * @param pitch The pitch of the tie.
-	 * @param valueOnsetTime The onset time of the tied in note.
-	 * @param voice The voice of the tied in note.
-	 * 
-	 * @return The note from {@link #unfinishedNotes} that matches the pitch onset time and voice.
-	 * @throws IOException If no matching note is found.
-	 */
-	private Note findAndRemoveUnfinishedNote(int pitch, int valueOnsetTime, int voice) throws IOException {
-		Iterator<Note> noteIterator = unfinishedNotes.iterator();
-		while (noteIterator.hasNext()) {
-			Note note = noteIterator.next();
+		// Convert
+		Converter converter = null;
+		if (useMidi) {
+			if (inFile == null) {
+				argumentError("-i FILE is required with MIDI files (-m).");
+			}
+			try {
+				converter = new MidiConverter(inFile, anacrusis, useChannel);
+			} catch (IOException | InvalidMidiDataException e) {
+				System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
+				System.exit(1);
+			}
 			
-			if (note.pitch == pitch && note.valueOffsetTime == valueOnsetTime && note.voice == voice) {
-				noteIterator.remove();
-				return note;
+		} else if (useXml) {
+			InputStream is = System.in;
+			if (inFile != null) {
+				try {
+					is = new FileInputStream(inFile);
+				} catch (IOException e) {
+					System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
+					System.exit(1);
+				}
+			}
+			converter = new MusicXmlConverter(is);
+			if (inFile != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
+					System.exit(1);
+				}
 			}
 		}
 		
-		throw new IOException("Tied note not found at pitch=" + pitch + " offset=" + valueOnsetTime + " voice=" + voice + ".");
-	}
-	
-	/**
-	 * Convert from XML tick to time, using {@link #MS_PER_BEAT}.
-	 * 
-	 * @param tick The XML tick.
-	 * @return The time, in milliseconds.
-	 */
-	private int getTimeFromTick(int tick) {
-		if (hierarchies.isEmpty()) {
-			return tick;
-		}
-		
-		int i;
-		for (i = 0; i < hierarchies.size() - 1; i++) {
-			if (hierarchyTicks.get(i + 1) > tick) {
-				break;
+		// Print result
+		if (outFile != null) {
+			try {
+				FileWriter fw = new FileWriter(outFile);
+				fw.write(converter.toString());
+				fw.close();
+			} catch (IOException e) {
+				System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
+				System.err.println();
+				System.err.println("Printing to std out instead:");
+				System.out.println(converter.toString());
 			}
+			
+		} else {
+			System.out.println(converter.toString());
 		}
-		
-		Hierarchy hierarchy = hierarchies.get(i);
-		int hierarchyTick = hierarchyTicks.get(i);
-		
-		return hierarchy.time + (int) Math.round(((double) tick - hierarchyTick) / hierarchy.tatumsPerSubBeat / hierarchy.subBeatsPerBeat * MS_PER_BEAT);
 	}
 	
 	/**
-	 * Create and return a list of tatums based on the parsed {@link #hierarchy}, {@link #firstTick}, and
-	 * {@link #lastTick}.
+	 * Some argument error occurred. Print the given message and the usage instructions to std err
+	 * and exit.
 	 * 
-	 * @return A list of the parsed tatums.
+	 * @param message The message to print to std err.
 	 */
-	private List<Tatum> getTatums() {
-		List<Tatum> tatums = new ArrayList<Tatum>(lastTick - firstTick);
+	private static void argumentError(String message) {
+		StringBuilder sb = new StringBuilder(message).append('\n');
 		
-		for (int tick = firstTick; tick < lastTick; tick++) {
-			tatums.add(new Tatum(getTimeFromTick(tick)));
-		}
+		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE] [-a INT] [-t]\n\n");
 		
-		return tatums;
-	}
-	
-	/**
-	 * Return a String version of the parsed musical score into our mv2h format.
-	 * 
-	 * @return The parsed musical score.
-	 */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+		sb.append("Exactly one format of -x or -m is required:\n");
+		sb.append("-x = Convert from parsed MusicXML.\n");
+		sb.append("-m = Convert from MIDI.\n\n");
 		
-		for (Note note : notes) {
-			sb.append(note).append('\n');
-		}
+		sb.append("-i FILE = Read input from the given FILE. Required for MIDI.\n");
+		sb.append("          If not given for MusicXML, read from std input.\n");
+		sb.append("-o FILE = Print out to the given FILE.\n");
+		sb.append("          If not given, print to std out.\n\n");
 		
-		for (Tatum tatum : getTatums()) {
-			sb.append(tatum).append('\n');
-		}
+		sb.append("MIDI-specific args:\n");
+		sb.append("-a INT = Set the length of the anacrusis (pick-up bar), in sub-beats.\n");
+		sb.append("-t = Use MIDI trakcs as ground truth voices, rather than channels.\n");
 		
-		for (Key key : keys) {
-			sb.append(key).append('\n');
-		}
-		
-		for (Hierarchy hierarchy : hierarchies) {
-			sb.append(hierarchy).append('\n');
-		}
-		
-		return sb.toString();
-	}
-	
-	/**
-	 * Get the pitch number of a note given its String.
-	 * 
-	 * @param pitchString A pitch String, like C##4, or Ab1, or G7.
-	 * @return The number of the given pitch, with A4 = 440Hz = 69.
-	 * 
-	 * @throws IOException If a parse error occurs.
-	 */
-	private static int getPitchFromString(String pitchString) throws IOException {
-		char pitchChar = pitchString.charAt(0);
-		int pitch;
-		switch (pitchChar) {
-			case 'C':
-				pitch = 0;
-				break;
-				
-			case 'D':
-				pitch = 2;
-				break;
-				
-			case 'E':
-				pitch = 4;
-				break;
-				
-			case 'F':
-				pitch = 5;
-				break;
-				
-			case 'G':
-				pitch = 7;
-				break;
-				
-			case 'A':
-				pitch = 9;
-				break;
-				
-			case 'B':
-				pitch = 11;
-				break;
-				
-			default:
-				throw new IOException("Pith " + pitchChar + " not recognized.");
-		}
-		
-		int accidental = pitchString.length() - pitchString.replace("#", "").length();
-		accidental -= pitchString.length() - pitchString.replace("b", "").length();
-		
-		int octave = Integer.parseInt(pitchString.substring(1).replace("#", "").replace("b", ""));						
-		
-		return (octave + 1) * 12 + pitch + accidental;
+		System.err.println(sb);
+		System.exit(1);
 	}
 }
