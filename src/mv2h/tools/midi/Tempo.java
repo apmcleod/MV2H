@@ -34,8 +34,8 @@ public class Tempo {
 	 * 
 	 * @return {@link #microSecondsPerQuarter}
 	 */
-	public int getMillisPerQuarter() {
-		return Math.round(microSecondsPerQuarter / 1000);
+	public double getMillisPerQuarter() {
+		return microSecondsPerQuarter / 1000.0;
 	}
 	
 	/**
@@ -57,20 +57,6 @@ public class Tempo {
 		}
 		
 		return tpq;
-	}
-
-    @Override
-    public String toString() {
-    	int qpm = (int) (60000. / getMillisPerQuarter());
-    	StringBuilder sb = new StringBuilder(6);
-    	sb.append(qpm);
-    	sb.append("QPM");
-    	return sb.toString();
-    }
-    
-    @Override
-	public int hashCode() {
-		return getMillisPerQuarter();
 	}
 	
 	@Override

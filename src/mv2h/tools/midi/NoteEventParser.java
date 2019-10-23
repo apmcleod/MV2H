@@ -54,7 +54,7 @@ public class NoteEventParser {
 	 * @return The MidiNote we just created.
      */
 	public Note noteOn(int key, int velocity, long tick, int channel) {
-		long time = timeTracker.getTimeAtTick(tick);
+		long time = Math.round(timeTracker.getTimeAtTick(tick));
 		
 		Note note = new Note(key, (int) time, (int) time, -1, channel);
 		
@@ -72,7 +72,7 @@ public class NoteEventParser {
      * @throws InvalidMidiDataException If a note off event doesn't match any previously seen note on events.
      */
 	public void noteOff(int key, long tick, int channel) throws InvalidMidiDataException {
-		long time = timeTracker.getTimeAtTick(tick);
+		long time = Math.round(timeTracker.getTimeAtTick(tick));
 		Iterator<Note> iterator = activeNotes.iterator();
 		
 		while (iterator.hasNext()) {

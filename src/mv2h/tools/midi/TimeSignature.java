@@ -90,20 +90,6 @@ public class TimeSignature {
 	}
 	
 	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder(4);
-		sb.append(numerator);
-		sb.append('/');
-		sb.append(denominator);
-		return sb.toString();
-	}
-	
-	@Override
-	public int hashCode() {
-		return getNumerator() + getDenominator();
-	}
-	
-	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof TimeSignature)) {
 			return false;

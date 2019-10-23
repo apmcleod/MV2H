@@ -30,6 +30,8 @@ public class Converter {
 		boolean useXml = false;
 		boolean useMidi = false;
 		int numToUse = 0;
+		int anacrusis = 0;
+		boolean useChannel = true;
 		
 		File inFile = null;
 		File outFile = null;
@@ -56,6 +58,7 @@ public class Converter {
 							}
 							break;
 							
+						// musicxml
 						case 'x':
 							if (!useXml) {
 								numToUse++;
@@ -63,6 +66,25 @@ public class Converter {
 							}
 							break;
 							
+						// Use track
+						case 't':
+							useChannel = false;
+							break;
+							
+						// anacrusis
+						case 'a':
+							i++;
+							if (args.length <= i) {
+								argumentError("No anacrusis length given with -a.");
+							}
+							try {
+								anacrusis = Integer.parseInt(args[i]);
+							} catch (NumberFormatException e) {
+								argumentError("Anacrusis must be an integer.");
+							}
+							break;
+							
+						// input file
 						case 'i':
 							i++;
 							if (args.length <= i) {
@@ -77,6 +99,7 @@ public class Converter {
 							}
 							break;
 							
+						// output file
 						case 'o':
 							i++;
 							if (args.length <= i) {
@@ -111,7 +134,7 @@ public class Converter {
 				argumentError("-i FILE is required with MIDI files (-m).");
 			}
 			try {
-				converter = new MidiConverter(inFile);
+				converter = new MidiConverter(inFile, anacrusis, useChannel);
 			} catch (IOException | InvalidMidiDataException e) {
 				System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
 				System.exit(1);
@@ -165,7 +188,7 @@ public class Converter {
 	private static void argumentError(String message) {
 		StringBuilder sb = new StringBuilder(message).append('\n');
 		
-		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE]\n\n");
+		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE] [-a INT] [-t]\n\n");
 		
 		sb.append("Exactly one format of -x or -m is required:\n");
 		sb.append("-x = Convert from parsed MusicXML.\n");
@@ -174,7 +197,11 @@ public class Converter {
 		sb.append("-i FILE = Read input from the given FILE. Required for MIDI.\n");
 		sb.append("          If not given for MusicXML, read from std input.\n");
 		sb.append("-o FILE = Print out to the given FILE.\n");
-		sb.append("          If not given, print to std out.\n");
+		sb.append("          If not given, print to std out.\n\n");
+		
+		sb.append("MIDI-specific args:\n");
+		sb.append("-a INT = Set the length of the anacrusis (pick-up bar), in sub-beats.\n");
+		sb.append("-t = Use MIDI trakcs as ground truth voices, rather than channels.\n");
 		
 		System.err.println(sb);
 		System.exit(1);

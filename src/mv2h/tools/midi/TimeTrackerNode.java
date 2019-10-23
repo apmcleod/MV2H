@@ -21,10 +21,10 @@ public class TimeTrackerNode {
 	private long startTick = 0L;
 	
 	/**
-	 * The start time for this TimeTrackerNode, measured in microseconds. That is, the time at which
+	 * The start time for this TimeTrackerNode, measured in milliseconds. That is, the time at which
 	 * this one's triple becomes valid.
 	 */
-	private long startTime = 0L;
+	private double startTime = 0.0;
 	
 	/**
 	 * The TimeSignature associated with this TimeTrackerNode.
@@ -84,9 +84,9 @@ public class TimeTrackerNode {
 	 * @param ppq The pulses per quarter note of the song.
 	 * @return The time at the given tick, measured in milliseconds.
 	 */
-	public int getTimeAtTick(long tick, double ppq) {
+	public double getTimeAtTick(long tick, double ppq) {
 		long tickOffset = tick - getStartTick();
-		return (int) Math.round(((tickOffset * getTimePerTick(ppq)) + getStartTime()));
+		return (tickOffset * getTimePerTick(ppq)) + startTime;
 	}
 	
 	/**
@@ -113,7 +113,7 @@ public class TimeTrackerNode {
 	 * 
 	 * @return {@link #startTime}
 	 */
-	public long getStartTime() {
+	public double getStartTime() {
 		return startTime;
 	}
 	
@@ -207,16 +207,17 @@ public class TimeTrackerNode {
 	 * @param time The time until which we should output tatums.
 	 * @return A List of Tatums at the given times.
 	 */
-	public List<Tatum> getSubBeatsUntil(double propFinished, int time) {
+	public List<Tatum> getSubBeatsUntil(double propFinished, double time) {
 		double millisPerSubBeat = getMillisPerSubBeat();
 		
 		// Correct start time for propFinished
-		double currentTime = (int) startTime - millisPerSubBeat * propFinished + millisPerSubBeat;
+		double currentTime = startTime - millisPerSubBeat * propFinished + millisPerSubBeat;
 		
 		List<Tatum> tatums = new ArrayList<Tatum>();
 		
 		while (currentTime <= time) {
 			tatums.add(new Tatum((int) Math.round(currentTime)));
+			currentTime += millisPerSubBeat;
 		}
 		
 		return tatums;
@@ -231,24 +232,14 @@ public class TimeTrackerNode {
 	 * @param time The time until which we should output tatums.
 	 * @return The proportion of the last sub beat which will be completed at the given time.
 	 */
-	public double getPropFinished(double propFinished, int time) {
+	public double getPropFinished(double propFinished, double time) {
 		double millisPerSubBeat = getMillisPerSubBeat();
 		
 		// Correct start time for propFinished
-		double prevTime = (int) startTime - millisPerSubBeat * propFinished;
+		double prevTime = startTime - millisPerSubBeat * propFinished;
 		
 		// Length of remainder time in sub beats
-		return ((time - prevTime) % millisPerSubBeat) / millisPerSubBeat;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("{Tick=");
-		sb.append(startTick);
-		sb.append(" Time=").append(startTime);
-		sb.append(" Key=").append(getKey());
-		sb.append(" ").append(getTimeSignature());
-		sb.append(" ").append(getTempo()).append('}');
-		return sb.toString();
+		propFinished = ((time - prevTime) % millisPerSubBeat) / millisPerSubBeat;
+		return propFinished == 0 ? 1.0 : propFinished;
 	}
 }

@@ -35,12 +35,15 @@ public class MidiConverter extends Converter {
 	 * {@link #toString()}.
 	 * 
 	 * @param file The MIDI file to convert.
+	 * @param anacrusis The anacrusis (pick-up) length, in sub beats.
+	 * @param useChannel True to use channels as ground truth voices. False to use tracks.
 	 * @throws InvalidMidiDataException 
 	 */
-	public MidiConverter(File file) throws IOException, InvalidMidiDataException {
+	public MidiConverter(File file, int anacrusis, boolean useChannel) throws IOException, InvalidMidiDataException {
 		tt = new TimeTracker();
+		tt.setAnacrusis(anacrusis);
 		nep = new NoteEventParser(tt);
-		MidiEventParser mep = new MidiEventParser(file, nep, tt, false);
+		MidiEventParser mep = new MidiEventParser(file, nep, tt, useChannel);
 		mep.run();
 	}
 	

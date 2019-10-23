@@ -105,9 +105,9 @@ public class Main {
 							PRINT_ALIGNMENT = true;
 							
 						case 'a':
-							DURATION_DELTA = 5;
+							DURATION_DELTA = 20;
 							ONSET_DELTA = 0;
-							GROUPING_EPSILON = 5;
+							GROUPING_EPSILON = 20;
 							PERFORM_ALIGNMENT = true;
 							break;
 						

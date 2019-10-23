@@ -141,7 +141,7 @@ public class TimeTracker {
      * @param tick The tick number to calculate the time of
      * @return The time of the given tick number, measured in microseconds since the most recent epoch.
      */
-    public long getTimeAtTick(long tick) {
+    public double getTimeAtTick(long tick) {
     	return getNodeAtTick(tick).getTimeAtTick(tick, PPQ);
     }
     
@@ -229,19 +229,19 @@ public class TimeTracker {
 		}
     	
     	// Add Tatums (sub-beats)
-    	double propFinished = 0.0;
+    	double propFinished = 1.0;
     	for (int i = 1; i < nodes.size(); i++) {
     		TimeTrackerNode prevNode = nodes.get(i - 1);
     		TimeTrackerNode nextNode = nodes.get(i);
     		
-    		for (Tatum tatum : prevNode.getSubBeatsUntil(propFinished, (int) nextNode.getStartTime())) {
+    		for (Tatum tatum : prevNode.getSubBeatsUntil(propFinished, nextNode.getStartTime())) {
     			meter.addTatum(tatum);
     		}
-    		propFinished = prevNode.getPropFinished(propFinished, (int) nextNode.getStartTime());
+    		propFinished = prevNode.getPropFinished(propFinished, nextNode.getStartTime());
     	}
     	
     	// Add last tatums
-    	for (Tatum tatum : nodes.get(nodes.size() - 1).getSubBeatsUntil(propFinished, (int) lastTick)) {
+    	for (Tatum tatum : nodes.get(nodes.size() - 1).getSubBeatsUntil(propFinished, lastTick)) {
     		meter.addTatum(tatum);
     	}
     	
