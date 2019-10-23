@@ -57,7 +57,7 @@ Chord symbols will not be parsed.
 
 ##### Additional Args
 * `-a INT` = Set an anacrusis (pick-up bar) length of INT sub beats.
-* `-T` = Use tracks as ground truth voices rather than channels.
+* `-t` = Use tracks as ground truth voices rather than channels.
 
 ### Averaging Multiple Evaluations
 To get the averages of many MV2H evaluations:

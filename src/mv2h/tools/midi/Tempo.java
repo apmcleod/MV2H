@@ -30,9 +30,9 @@ public class Tempo {
 	}
 
 	/**
-	 * Gets the number of milliseconds which pass per quarter note.
+	 * Gets the number of milliseconds per quarter note at this tempo.
 	 * 
-	 * @return {@link #microSecondsPerQuarter}
+	 * @return {@link #microSecondsPerQuarter} converted to milliseconds.
 	 */
 	public double getMillisPerQuarter() {
 		return microSecondsPerQuarter / 1000.0;

@@ -1,7 +1,6 @@
 package mv2h.tools.midi;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -88,17 +87,6 @@ public class NoteEventParser {
 		// Note off event didn't match any active notes.
 		throw new InvalidMidiDataException("Note off event doesn't match any note on: " +
 				"pitch=" + key + ", tick=" + tick + " voice=" + channel);
-	}
-
-	/**
-	 * Returns a list of the notes present in this song, in time order.
-	 * 
-	 * @return A list of the notes present as described above.
-	 */
-	public List<Note> getNoteList() {
-		Collections.sort(completedNotes);
-		
-		return completedNotes;
 	}
 	
 	@Override

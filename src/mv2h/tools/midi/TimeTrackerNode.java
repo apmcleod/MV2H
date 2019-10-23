@@ -48,10 +48,8 @@ public class TimeTrackerNode {
 	
 	/**
 	 * Create a new dummy first TimeTrackerNode at tick and time 0.
-	 * 
-	 * @param ppq The pulses per quarter note of the song.
 	 */
-	public TimeTrackerNode(double ppq) {
+	public TimeTrackerNode() {
 		startTick = 0L;
 		isTimeSignatureDummy = true;
 		
@@ -191,9 +189,9 @@ public class TimeTrackerNode {
 	}
 	
 	/**
-	 * Get the number of microseconds per sub beat.
+	 * Get the number of milliseconds per sub beat.
 	 * 
-	 * @return Microseconds per sub beat.
+	 * @return Milliseconds per sub beat.
 	 */
 	private double getMillisPerSubBeat() {
 		return tempo.getMillisPerQuarter() / timeSignature.getSubBeatsPerQuarter();

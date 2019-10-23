@@ -56,7 +56,7 @@ public class TimeTracker {
     public TimeTracker(int subBeatLength) {
     	anacrusisLengthSubBeats = 0;
     	nodes = new LinkedList<TimeTrackerNode>();
-    	nodes.add(new TimeTrackerNode(PPQ));
+    	nodes.add(new TimeTrackerNode());
     }
     
     /**
@@ -136,10 +136,10 @@ public class TimeTracker {
 	}
     
     /**
-     * Returns the time in microseconds of a given tick number.
+     * Returns the time in milliseconds at a given tick.
      * 
-     * @param tick The tick number to calculate the time of
-     * @return The time of the given tick number, measured in microseconds since the most recent epoch.
+     * @param tick The tick number to calculate the time of.
+     * @return The time of the given tick number, measured in milliseconds since time 0.
      */
     public double getTimeAtTick(long tick) {
     	return getNodeAtTick(tick).getTimeAtTick(tick, PPQ);
@@ -275,19 +275,4 @@ public class TimeTracker {
     public void setPPQ(double ppq) {
     	PPQ = ppq;
     }
-	
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("[");
-		
-		ListIterator<TimeTrackerNode> iterator = nodes.listIterator();
-		
-		while (iterator.hasNext()) {
-			sb.append(iterator.next().toString()).append(',');
-		}
-		
-		sb.deleteCharAt(sb.length() - 1);
-		sb.append(']');
-		return sb.toString();
-	}
 }
