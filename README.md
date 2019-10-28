@@ -47,17 +47,14 @@ See [Dataset](#dataset) for examples.
 
 #### MIDI
 1. Convert a MIDI file into the MV2H format:  
-`java -cp bin mv2h.tools.Converter -m -i gt.mid >gt_converted.txt`  
+`java -cp bin mv2h.tools.Converter -m [-a INT] -i gt.mid >gt_converted.txt`  
+`-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats.
 An output file can also be specified with `-o FILE`. 
 
 2. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
 
 Chord symbols will not be parsed.
-
-##### Additional Args
-* `-a INT` = Set an anacrusis (pick-up bar) length of INT sub beats.
-* `-t` = Use tracks as ground truth voices rather than channels.
 
 ### Averaging Multiple Evaluations
 To get the averages of many MV2H evaluations:
