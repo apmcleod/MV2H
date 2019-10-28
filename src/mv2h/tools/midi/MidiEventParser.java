@@ -2,6 +2,8 @@ package mv2h.tools.midi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
@@ -25,6 +27,11 @@ public class MidiEventParser {
 	 * The mask for reading the channel number from a MidiMessage.
 	 */
 	public static final int CHANNEL_MASK = 0x0f;
+	
+	/**
+	 * The total number of possible MIDI channels.
+	 */
+	public static final int NUM_CHANNELS = 16;
 	
 	/**
 	 * The mask for reading the message type from a MidiMessage.
@@ -67,9 +74,9 @@ public class MidiEventParser {
 	private int firstNoteTime;
 	
 	/**
-	 * True if we want to use the input data's channel as gold standard voices. False to use track instead.
+	 * A mapping of MIDI voice (track * NUM_CHANNELS + channel) to 0-indexed MV2H voices.
 	 */
-	private boolean useChannel;
+	private final Map<Integer, Integer> voiceMap;
     
 	/**
 	 * Creates a new MidiEventParser
@@ -81,7 +88,7 @@ public class MidiEventParser {
 	 * @throws IOException If an I/O error occurred when reading the given file. 
 	 * @throws InvalidMidiDataException If the given file was is not in a valid MIDI format.
 	 */
-    public MidiEventParser(File midiFile, NoteEventParser noteEventParser, TimeTracker timeTracker, boolean useChannel)
+    public MidiEventParser(File midiFile, NoteEventParser noteEventParser, TimeTracker timeTracker)
     		throws InvalidMidiDataException, IOException{
     	song = MidiSystem.getSequence(midiFile);
     	
@@ -90,9 +97,9 @@ public class MidiEventParser {
     	
     	timeTracker.setPPQ(song.getResolution());
     	
-    	this.useChannel = useChannel;
-    	
     	firstNoteTime = Integer.MAX_VALUE;
+    	
+    	voiceMap = new HashMap<Integer, Integer>();
     }
 	
     /**
@@ -163,9 +170,13 @@ public class MidiEventParser {
 	                	
 	        } else {
 	           	int channel = status & CHANNEL_MASK;
-	                	
-	           	int correctVoice = useChannel ? channel : trackNum;
-	                	
+	           	int midiVoice = trackNum * NUM_CHANNELS + channel;
+	           	
+	           	if (!voiceMap.containsKey(midiVoice)) {
+	           		voiceMap.put(midiVoice, voiceMap.size());
+	           	}
+	           	int correctVoice = voiceMap.get(midiVoice);
+	            
 		        switch (status & MESSAGE_MASK) {
 			                	
 		           	case ShortMessage.NOTE_ON:

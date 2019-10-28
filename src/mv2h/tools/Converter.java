@@ -31,7 +31,6 @@ public class Converter {
 		boolean useMidi = false;
 		int numToUse = 0;
 		int anacrusis = 0;
-		boolean useChannel = true;
 		
 		File inFile = null;
 		File outFile = null;
@@ -64,11 +63,6 @@ public class Converter {
 								numToUse++;
 								useXml = true;
 							}
-							break;
-							
-						// Use track
-						case 't':
-							useChannel = false;
 							break;
 							
 						// anacrusis
@@ -134,7 +128,7 @@ public class Converter {
 				argumentError("-i FILE is required with MIDI files (-m).");
 			}
 			try {
-				converter = new MidiConverter(inFile, anacrusis, useChannel);
+				converter = new MidiConverter(inFile, anacrusis);
 			} catch (IOException | InvalidMidiDataException e) {
 				System.err.println("Error reading from " + inFile + ":\n" + e.getMessage());
 				System.exit(1);
@@ -188,7 +182,7 @@ public class Converter {
 	private static void argumentError(String message) {
 		StringBuilder sb = new StringBuilder(message).append('\n');
 		
-		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE] [-a INT] [-t]\n\n");
+		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE] [-a INT]\n\n");
 		
 		sb.append("Exactly one format of -x or -m is required:\n");
 		sb.append("-x = Convert from parsed MusicXML.\n");
@@ -201,7 +195,6 @@ public class Converter {
 		
 		sb.append("MIDI-specific args:\n");
 		sb.append("-a INT = Set the length of the anacrusis (pick-up bar), in sub-beats.\n");
-		sb.append("-t = Use MIDI trakcs as ground truth voices, rather than channels.\n");
 		
 		System.err.println(sb);
 		System.exit(1);

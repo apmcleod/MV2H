@@ -3,8 +3,10 @@ package mv2h.tools;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import mv2h.objects.Note;
@@ -65,6 +67,11 @@ public class MusicXmlConverter extends Converter {
 	 * The number of ticks per quarter note. 1 tick is 1 tatum. Defaults to 4.
 	 */
 	private int ticksPerQuarterNote = 4;
+	
+	/**
+	 * A mapping for XML voices ("part_staff_voice" strings) to 0-indexed MV2H voices.
+	 */
+	private final Map<String, Integer> voiceMap;
 
 	/**
 	 * Create a new MusicXmlConverter object by parsing the input from the MusicXMLParser.
@@ -78,6 +85,8 @@ public class MusicXmlConverter extends Converter {
 		Scanner in = new Scanner(stream);
 		int lineNum = 0;
 		boolean anacrusisHandled = false;
+		
+		voiceMap = new HashMap<String, Integer>();
 		
 		while (in.hasNextLine()) {
 			lineNum++;
@@ -96,7 +105,12 @@ public class MusicXmlConverter extends Converter {
 			}
 			
 			int tick = Integer.parseInt(attributes[0]);
-			int voice = Integer.parseInt(attributes[4]);
+			String xmlVoice = attributes[2] + "_" + attributes[3] + "_" + attributes[4];
+			
+			if (!voiceMap.containsKey(xmlVoice)) {
+				voiceMap.put(xmlVoice, voiceMap.size());
+			}
+			int voice = voiceMap.get(xmlVoice);
 			
 			lastTick = Math.max(tick, lastTick);
 			firstTick = Math.min(tick, firstTick);
