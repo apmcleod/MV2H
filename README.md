@@ -48,8 +48,8 @@ See [Dataset](#dataset) for examples.
 #### MIDI
 1. Convert a MIDI file into the MV2H format:  
 `java -cp bin mv2h.tools.Converter -m [-a INT] -i gt.mid >gt_converted.txt`  
-`-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats.
-An output file can also be specified with `-o FILE`. 
+`-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats.    
+`-o` can also be used to specify an output file (instead of standard output). 
 
 2. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
