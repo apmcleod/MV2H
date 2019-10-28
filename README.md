@@ -32,11 +32,11 @@ To evaluate a time-aligned transcription and ground truth:
 #### MusicXML
 1. Convert MusicXML into a text-based format:  
 `./MusicXMLParser/MusicXMLToFmt1x gt.xml gt_xml.txt`  
-(The C++ converter must be compiled first using `./compile.sh` in the `MusicXMLParser` directory.)
+* (The C++ converter must be compiled first using `./compile.sh` in the `MusicXMLParser` directory.)
 
 2. Convert that text-based format into the MV2H format:  
 `java -cp bin mv2h.tools.Converter -x <gt_xml.txt >gt_converted.txt`  
-Input and output files can also be specified with `-i FILE` and `-o FILE`. 
+* Input and output files can also be specified with `-i FILE` and `-o FILE`. 
 
 3. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
@@ -48,8 +48,8 @@ See [Dataset](#dataset) for examples.
 #### MIDI
 1. Convert a MIDI file into the MV2H format:  
 `java -cp bin mv2h.tools.Converter -m [-a INT] -i gt.mid >gt_converted.txt`  
-`-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats.    
-`-o` can also be used to specify an output file (instead of standard output). 
+* `-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats.    
+* `-o FILE` can also be used to specify an output file (instead of standard output). 
 
 2. Evaluate with alignment using the `-a` flag:  
 `java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
