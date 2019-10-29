@@ -251,14 +251,16 @@ public class Music {
 							}
 						}
 					}
-					int connectionFalsePositives = transcriptionNotes.size();
-					int connectionFalseNegatives = groundTruthNotes.size();
+					int connectionFalsePositives = nextTranscriptionNotes.size();
+					int connectionFalseNegatives = nextGroundTruthNotes.size();
 					
 					// Normalize counts before adding to totals, so that each connection is weighted equally
-					int total = connectionTruePositives + connectionFalsePositives + connectionFalseNegatives;
-					voiceTruePositives += ((double) connectionTruePositives) / (total * nextTranscriptionNotesFinal.size());
-					voiceFalsePositives += ((double) connectionFalsePositives) / (total * nextTranscriptionNotesFinal.size());
-					voiceFalseNegatives += ((double) connectionFalseNegatives) / (total * nextTranscriptionNotesFinal.size());
+					double total = connectionTruePositives + ((connectionFalsePositives + connectionFalseNegatives) / 2.0);
+					if (total > 0) {
+						voiceTruePositives += ((double) connectionTruePositives) / (total * nextTranscriptionNotesFinal.size());
+						voiceFalsePositives += ((double) connectionFalsePositives) / (total * nextTranscriptionNotesFinal.size());
+						voiceFalseNegatives += ((double) connectionFalseNegatives) / (total * nextTranscriptionNotesFinal.size());
+					}
 					
 					// Add notes to lists to noteValue check
 					if (connectionTruePositives > 0 || connectionFalsePositives + connectionFalseNegatives == 0) {
