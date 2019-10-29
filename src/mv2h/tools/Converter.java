@@ -232,7 +232,7 @@ public class Converter {
 	private static void argumentError(String message) {
 		StringBuilder sb = new StringBuilder(message).append('\n');
 		
-		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE] [-a INT]\n\n");
+		sb.append("Usage: Converter [-x | -m] [-i FILE] [-o FILE] [-a INT] [--VOICE_ARGS]\n\n");
 		
 		sb.append("Exactly one format of -x or -m is required:\n");
 		sb.append("-x = Convert from parsed MusicXML.\n");
@@ -242,6 +242,15 @@ public class Converter {
 		sb.append("          If not given for MusicXML, read from std input.\n");
 		sb.append("-o FILE = Print out to the given FILE.\n");
 		sb.append("          If not given, print to std out.\n\n");
+		
+		sb.append("Voice specific args (can include multiple; defaults to all):\n");
+		sb.append("MusicXML:\n");
+		sb.append("  --part = Use part (instrument) to separate parsed voices.\n");
+		sb.append("  --staff = Use staff to separate parsed voices.\n");
+		sb.append("  --voice = Use voice to separate parsed voices.\n");
+		sb.append("MIDI:\n");
+		sb.append("  --channel = Use channel to separate parsed voices.\n");
+		sb.append("  --track = Use track to separate parsed voices.\n\n");
 		
 		sb.append("MIDI-specific args:\n");
 		sb.append("-a INT = Set the length of the anacrusis (pick-up bar), in sub-beats.\n");
