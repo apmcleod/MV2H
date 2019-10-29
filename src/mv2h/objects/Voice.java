@@ -84,6 +84,24 @@ public class Voice {
 	}
 	
 	/**
+	 * Get the NoteCluster associated with the given note, if it exists in this voice.
+	 * Else, return null.
+	 * 
+	 * @param note The note we are searching for.
+	 * @return The NoteCluster in this voice which contains the given note, or null if
+	 * none does.
+	 */
+	public NoteCluster getNoteCluster(Note note) {
+		NoteCluster cluster = noteClusters.get((new NoteCluster(note.valueOnsetTime, note.valueOffsetTime).getKeyString()));
+		
+		if (cluster != null && cluster.notes.contains(note)) {
+			return cluster;
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Add a note to the voice.
 	 * 
 	 * @param note The note to add.

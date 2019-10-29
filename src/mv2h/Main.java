@@ -346,15 +346,15 @@ public class Main {
 	/**
 	 * Calculate the F-measure given counts of TP, FP, and FN.
 	 * 
-	 * @param truePositives The number of true positives.
-	 * @param falsePositives The number of false positives.
-	 * @param falseNegatives The number of false negatives.
+	 * @param voiceTruePositives The number of true positives.
+	 * @param voiceFalsePositives The number of false positives.
+	 * @param voiceFalseNegatives The number of false negatives.
 	 * 
 	 * @return The F-measure of the given counts, or 0 if the result is otherwise NaN.
 	 */
-	public static double getF1(int truePositives, int falsePositives, int falseNegatives) {
-		double precision = ((double) truePositives) / (truePositives + falsePositives);
-		double recall = ((double) truePositives) / (truePositives + falseNegatives);
+	public static double getF1(double voiceTruePositives, double voiceFalsePositives, double voiceFalseNegatives) {
+		double precision = voiceTruePositives / (voiceTruePositives + voiceFalsePositives);
+		double recall = voiceTruePositives / (voiceTruePositives + voiceFalseNegatives);
 		
 		double f1 = 2.0 * recall * precision / (recall + precision);
 		return Double.isNaN(f1) ? 0.0 : f1;
