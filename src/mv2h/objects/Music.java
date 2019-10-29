@@ -221,13 +221,12 @@ public class Music {
 					NoteCluster groundTruthCluster = groundTruthVoice.getNoteCluster(groundTruthNote);
 					
 					// Create list of notes which are linked to in the ground truth
-					List<Note> nextGroundTruthNotesFinal = new ArrayList<Note>();
+					List<Note> nextGroundTruthNotes = new ArrayList<Note>();
 					for (NoteCluster nextGroundTruthCluster : groundTruthCluster.nextClusters) {
 						for (Note nextGroundTruthNote : nextGroundTruthCluster.notes) {
-							nextGroundTruthNotesFinal.add(nextGroundTruthNote);
+							nextGroundTruthNotes.add(nextGroundTruthNote);
 						}
 					}
-					List<Note> nextGroundTruthNotes = new ArrayList<Note>(nextGroundTruthNotesFinal);
 					
 					// Save a copy of the linked transcription notes list
 					List<Note> nextTranscriptionNotes = new ArrayList<Note>(nextTranscriptionNotesFinal);
@@ -258,10 +257,9 @@ public class Music {
 					// Normalize counts before adding to totals, so that each connection is weighted equally
 					double total = connectionTruePositives + ((connectionFalsePositives + connectionFalseNegatives) / 2.0);
 					if (total > 0) {
-						double avgLength = (nextTranscriptionNotesFinal.size() + nextGroundTruthNotesFinal.size()) / 2.0;
-						voiceTruePositives += ((double) connectionTruePositives) / (total * avgLength);
-						voiceFalsePositives += ((double) connectionFalsePositives) / (total * avgLength);
-						voiceFalseNegatives += ((double) connectionFalseNegatives) / (total * avgLength);
+						voiceTruePositives += ((double) connectionTruePositives) / (total * transcriptionCluster.notes.size());
+						voiceFalsePositives += ((double) connectionFalsePositives) / (total * transcriptionCluster.notes.size());
+						voiceFalseNegatives += ((double) connectionFalseNegatives) / (total * transcriptionCluster.notes.size());
 					}
 					
 					// Add note to list to noteValue check
