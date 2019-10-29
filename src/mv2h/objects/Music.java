@@ -140,7 +140,7 @@ public class Music {
 		
 		// Tracking lists for voices, which will include only matched notes
 		List<Voice> transcriptionVoices = new ArrayList<Voice>(transcription.voices.size());
-		for (int i = 0; i < voices.size(); i++) {
+		for (int i = 0; i < transcription.voices.size(); i++) {
 			transcriptionVoices.add(new Voice());
 		}
 		
