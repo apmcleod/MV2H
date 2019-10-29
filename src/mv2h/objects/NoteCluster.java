@@ -63,6 +63,13 @@ public class NoteCluster implements Comparable<NoteCluster> {
 		nextClusters.add(cluster);
 	}
 	
+	/**
+	 * Get the String to be used as a lexicographically-ordered key for putting NoteClusters
+	 * into hashes. The key String is "onsetTime_offsetTime", where both times are 0-padded
+	 * on the left until the length of MAX_INT.
+	 * 
+	 * @return The key String to use for putting this NoteCluster into a lexicographically-ordered hash.
+	 */
 	public String getKeyString() {
 		StringBuilder sb = new StringBuilder("");
 		

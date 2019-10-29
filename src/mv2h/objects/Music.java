@@ -84,6 +84,10 @@ public class Music {
 		this.keyProgression = keyProgression;
 		this.chordProgression = chordProgression;
 		this.lastTime = lastTime;
+		
+		for (Voice voice : voices) {
+			voice.createConnections();
+		}
 	}
 	
 	/**

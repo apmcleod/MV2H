@@ -43,6 +43,12 @@ public class Voice {
 	 * </ol>
 	 */
 	public void createConnections() {
+		// First, clear all connections
+		for (NoteCluster cluster : noteClusters.values()) {
+			cluster.nextClusters.clear();
+		}
+		
+		// Create new connections
 		for (Map.Entry<String, NoteCluster> base : noteClusters.entrySet()) {
 			String baseKey = base.getKey();
 			NoteCluster baseCluster = base.getValue();
