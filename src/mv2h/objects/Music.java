@@ -262,10 +262,36 @@ public class Music {
 						voiceFalseNegatives += ((double) connectionFalseNegatives) / (total * nextTranscriptionNotesFinal.size());
 					}
 					
-					// Add notes to lists to noteValue check
-					if (connectionTruePositives > 0 || connectionFalsePositives + connectionFalseNegatives == 0) {
-						// If there was a true positive connection OR this was the last cluster in the transcription and the ground truth
+					// Add note to list to noteValue check
+					
+					// List of notes which are linked to in the original ground truth (including multi-pitch non-TPs)
+					List<Note> nextOriginalGroundTruthNotes = new ArrayList<Note>();
+					for (NoteCluster nextGroundTruthCluster : voices.get(groundTruthNote.voice).getNoteCluster(groundTruthNote).nextClusters) {
+						for (Note nextGroundTruthNote : nextGroundTruthCluster.notes) {
+							nextOriginalGroundTruthNotes.add(nextGroundTruthNote);
+						}
+					}
+					
+					// Both are the end of a voice
+					if (nextOriginalGroundTruthNotes.isEmpty() && nextTranscriptionNotesFinal.isEmpty()) {
 						valueCheckNotes.add(transcriptionNote);
+						
+					} else {
+						// Check if at least one original ground truth connection was correct
+						boolean match = false;
+						for (Note nextGroundTruthNote : nextOriginalGroundTruthNotes) {
+							for (Note nextTranscriptionNote : nextTranscriptionNotesFinal) {
+								if (nextTranscriptionNote.matches(nextGroundTruthNote)) {
+									match = true;
+									valueCheckNotes.add(transcriptionNote);
+									break;
+								}
+							}
+							
+							if (match) {
+								break;
+							}
+						}
 					}
 				}
 			}
