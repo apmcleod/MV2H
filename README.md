@@ -127,4 +127,5 @@ The original music XML files are available [here](https://github.com/AndreaCogli
 
 
 ## Old Versions
+- For the ISMIR 2019 LBD version of the code, without homophonic and polyphonic voice support, see the tag [v2.0](https://github.com/apmcleod/MV2H/releases/tag/v2.0)
 - For the original version of the code, as it was for the ISMIR 2018 submission, see the tag [v1.0](https://github.com/apmcleod/MV2H/releases/tag/v1.0).
