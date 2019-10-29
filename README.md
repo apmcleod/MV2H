@@ -1,6 +1,9 @@
 # MV2H
 
-This is the code for the MV2H metric, originally proposed in my 2018 ISMIR paper. It has since been adapted to handle non-time-aligned transcriptions (i.e. musical score to musical score evaluation), as detailed in the technical report on [arXiv](https://arxiv.org/abs/1906.00566).
+This is the code for the MV2H metric, originally proposed in my 2018 ISMIR paper.
+
+- [v2.0](https://github.com/apmcleod/MV2H/releases/tag/v2.0) added support for non-time-aligned transcriptions (i.e. musical score to musical score evaluation), as detailed in the technical report on [arXiv](https://arxiv.org/abs/1906.00566).
+- [v2.1](https://github.com/apmcleod/MV2H/releases/tag/v2.1) added support for evaluating homophonic and polyphonic voice separation.
 
 If you use the metric, please cite it:
 
