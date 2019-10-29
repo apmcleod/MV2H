@@ -15,6 +15,7 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
 
 import mv2h.objects.Note;
+import mv2h.tools.Converter;
 
 /**
  * A <code>MidiEventParser</code> handles the interfacing between this program and MIDI files.
@@ -170,8 +171,17 @@ public class MidiEventParser {
 	                	
 	        } else {
 	           	int channel = status & CHANNEL_MASK;
-	           	int midiVoice = trackNum * NUM_CHANNELS + channel;
 	           	
+	           	// Zero out unused voice markers
+	           	if (!Converter.CHANNEL) {
+	           		channel = 0;
+	           	}
+	           	if (!Converter.TRACK) {
+	           		trackNum = 0;
+	           	}
+	           	
+	           	// Get voice
+	           	int midiVoice = trackNum * NUM_CHANNELS + channel;
 	           	if (!voiceMap.containsKey(midiVoice)) {
 	           		voiceMap.put(midiVoice, voiceMap.size());
 	           	}

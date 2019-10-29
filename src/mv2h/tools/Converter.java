@@ -21,6 +21,19 @@ public class Converter {
 	public static final int MS_PER_BEAT = 500;
 	
 	/**
+	 * Options for MusicXML voice calculation.
+	 */
+	public static boolean PART = false;
+	public static boolean STAFF = false;
+	public static boolean VOICE = false;
+	
+	/**
+	 * Options for MIDI voice calculation.
+	 */
+	public static boolean CHANNEL = false;
+	public static boolean TRACK = false;
+	
+	/**
 	 * Run the program, reading the MusicXMLParser output from standard in and printing to
 	 * standard out.
 	 * 
@@ -105,6 +118,34 @@ public class Converter {
 							outFile = new File(args[i]);
 							break;
 							
+						// Voice options
+						case '-':
+							switch (args[i].substring(2)) {
+								case "part":
+									PART = true;
+									break;
+									
+								case "staff":
+									STAFF = true;
+									break;
+									
+								case "voice":
+									VOICE = true;
+									break;
+									
+								case "channel":
+									CHANNEL = true;
+									break;
+									
+								case "track":
+									TRACK = true;
+									break;
+									
+								default:
+									argumentError("Unrecognized option: " + args[i]);
+							}
+							break;
+							
 						// Error
 						default:
 							argumentError("Unrecognized option: " + args[i]);
@@ -124,6 +165,10 @@ public class Converter {
 		// Convert
 		Converter converter = null;
 		if (useMidi) {
+			if (!CHANNEL && !TRACK) {
+				CHANNEL = true;
+				TRACK = true;
+			}
 			if (inFile == null) {
 				argumentError("-i FILE is required with MIDI files (-m).");
 			}
@@ -135,6 +180,11 @@ public class Converter {
 			}
 			
 		} else if (useXml) {
+			if (!PART && !STAFF && !VOICE) {
+				PART = true;
+				STAFF = true;
+				VOICE = true;
+			}
 			InputStream is = System.in;
 			if (inFile != null) {
 				try {

@@ -105,6 +105,17 @@ public class MusicXmlConverter extends Converter {
 			}
 			
 			int tick = Integer.parseInt(attributes[0]);
+			
+			// Zero out unused voice markers
+			if (!Converter.PART) {
+				attributes[2] = "0";
+			}
+			if (!Converter.STAFF) {
+				attributes[3] = "0";
+			}
+			if (!Converter.VOICE) {
+				attributes[4] = "0";
+			}
 			String xmlVoice = attributes[2] + "_" + attributes[3] + "_" + attributes[4];
 			
 			if (!voiceMap.containsKey(xmlVoice)) {
