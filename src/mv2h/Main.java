@@ -352,9 +352,9 @@ public class Main {
 	 * 
 	 * @return The F-measure of the given counts, or 0 if the result is otherwise NaN.
 	 */
-	public static double getF1(int truePositives, int falsePositives, int falseNegatives) {
-		double precision = ((double) truePositives) / (truePositives + falsePositives);
-		double recall = ((double) truePositives) / (truePositives + falseNegatives);
+	public static double getF1(double truePositives, double falsePositives, double falseNegatives) {
+		double precision = truePositives / (truePositives + falsePositives);
+		double recall = truePositives / (truePositives + falseNegatives);
 		
 		double f1 = 2.0 * recall * precision / (recall + precision);
 		return Double.isNaN(f1) ? 0.0 : f1;

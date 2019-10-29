@@ -84,6 +84,10 @@ public class Music {
 		this.keyProgression = keyProgression;
 		this.chordProgression = chordProgression;
 		this.lastTime = lastTime;
+		
+		for (Voice voice : voices) {
+			voice.createConnections();
+		}
 	}
 	
 	/**
@@ -135,14 +139,14 @@ public class Music {
 		List<Note> groundTruthNotes = new ArrayList<Note>(notes);
 		
 		// Tracking lists for voices, which will include only matched notes
-		List<List<Note>> transcriptionVoices = new ArrayList<List<Note>>(transcription.voices.size());
+		List<Voice> transcriptionVoices = new ArrayList<Voice>(transcription.voices.size());
 		for (int i = 0; i < transcription.voices.size(); i++) {
-			transcriptionVoices.add(new ArrayList<Note>());
+			transcriptionVoices.add(new Voice());
 		}
 		
-		List<List<Note>> groundTruthVoices = new ArrayList<List<Note>>(voices.size());
+		List<Voice> groundTruthVoices = new ArrayList<Voice>(voices.size());
 		for (int i = 0; i < voices.size(); i++) {
-			groundTruthVoices.add(new ArrayList<Note>());
+			groundTruthVoices.add(new Voice());
 		}
 		
 		// Notes which we can check for value accuracy
@@ -168,8 +172,8 @@ public class Music {
 					
 					groundTruthNoteMapping.put(transcriptionNote, groundTruthNote);
 					
-					transcriptionVoices.get(transcriptionNote.voice).add(transcriptionNote);
-					groundTruthVoices.get(groundTruthNote.voice).add(groundTruthNote);
+					transcriptionVoices.get(transcriptionNote.voice).addNote(transcriptionNote);
+					groundTruthVoices.get(groundTruthNote.voice).addNote(groundTruthNote);
 					
 					groundTruthIterator.remove();
 					transcriptionIterator.remove();
@@ -182,85 +186,118 @@ public class Music {
 		
 		double multiPitchF1 = Main.getF1(multiPitchTruePositives, multiPitchFalsePositives, multiPitchFalseNegatives);
 		
-		// Sort each voice
-		for (List<Note> voice : transcriptionVoices) {
-			Collections.sort(voice);
+		// Make voice connections
+		for (Voice voice : transcriptionVoices) {
+			voice.createConnections();
 		}
-		for (List<Note> voice : groundTruthVoices) {
-			Collections.sort(voice);
+		for (Voice voice : groundTruthVoices) {
+			voice.createConnections();
 		}
 		
 		// Voice separation
-		int voiceTruePositives = 0;
-		int voiceFalsePositives = 0;
+		double voiceTruePositives = 0;
+		double voiceFalsePositives = 0;
+		double voiceFalseNegatives = 0;
 		// Go through each voice in the transcription (this is only matched notes)
-		for (List<Note> transcriptionVoice : transcriptionVoices) {
+		for (Voice transcriptionVoice : transcriptionVoices) {
 			
-			// Go through each matched note in the transcription voice
-			for (int transcriptionIndex = 0; transcriptionIndex < transcriptionVoice.size() - 1; transcriptionIndex++) {
-				Note transcriptionNote = transcriptionVoice.get(transcriptionIndex);
-				Note groundTruthNote = groundTruthNoteMapping.get(transcriptionNote);
+			// Go through each note cluster in the transcription voice
+			for (NoteCluster transcriptionCluster : transcriptionVoice.noteClusters.values()) {
 				
-				// Find the matching ground truth note and its place in its voice
-				List<Note> groundTruthVoice = groundTruthVoices.get(groundTruthNote.voice);
-				int groundTruthNoteIndex = Collections.binarySearch(groundTruthVoice, groundTruthNote);
+				// Create list of notes which are linked to in the transcription
+				List<Note> nextTranscriptionNotesFinal = new ArrayList<Note>();
+				for (NoteCluster nextTranscriptionCluster : transcriptionCluster.nextClusters) {
+					for (Note nextTranscriptionNote : nextTranscriptionCluster.notes) {
+						nextTranscriptionNotesFinal.add(nextTranscriptionNote);
+					}
+				}
 				
-				// Check if the transition out of this note matches the ground truth transition
-				if (groundTruthNoteIndex != groundTruthVoice.size() - 1 && groundTruthNoteIndex >= 0 &&
-						groundTruthVoice.get(groundTruthNoteIndex + 1).equals(groundTruthNoteMapping.get(transcriptionVoice.get(transcriptionIndex + 1)))) {
-					voiceTruePositives++;
+				// Go through each note in the note cluster
+				for (Note transcriptionNote : transcriptionCluster.notes) {
+					Note groundTruthNote = groundTruthNoteMapping.get(transcriptionNote);
+				
+					// Find the matching ground truth note and its place in its voice
+					Voice groundTruthVoice = groundTruthVoices.get(groundTruthNote.voice);
+					NoteCluster groundTruthCluster = groundTruthVoice.getNoteCluster(groundTruthNote);
 					
-					// Check if we should count this note for note value score (if the original next note is correct)
-					Iterator<Note> originalGroundTruthVoiceIterator = voices.get(groundTruthNote.voice).getNotes().iterator();
-					while (originalGroundTruthVoiceIterator.hasNext()) {
-						Note originalGroundTruthNote = originalGroundTruthVoiceIterator.next();
+					// Create list of notes which are linked to in the ground truth
+					List<Note> nextGroundTruthNotesFinal = new ArrayList<Note>();
+					for (NoteCluster nextGroundTruthCluster : groundTruthCluster.nextClusters) {
+						for (Note nextGroundTruthNote : nextGroundTruthCluster.notes) {
+							nextGroundTruthNotesFinal.add(nextGroundTruthNote);
+						}
+					}
+					List<Note> nextGroundTruthNotes = new ArrayList<Note>(nextGroundTruthNotesFinal);
+					
+					// Save a copy of the linked transcription notes list
+					List<Note> nextTranscriptionNotes = new ArrayList<Note>(nextTranscriptionNotesFinal);
+					
+					// Count how many tp, fp, and fn for these connection sets
+					int connectionTruePositives = 0;
+					Iterator<Note> transcriptionConnectionIterator = nextTranscriptionNotes.iterator();
+					while (transcriptionConnectionIterator.hasNext()) {
+						Note nextTranscriptionNote = transcriptionConnectionIterator.next();
 						
-						// We found the correct original ground truth note
-						if (originalGroundTruthNote.equals(groundTruthNote)) {
+						Iterator<Note> groundTruthConnectionIterator = nextGroundTruthNotes.iterator();
+						while (groundTruthConnectionIterator.hasNext()) {
+							Note nextGroundTruthNote = groundTruthConnectionIterator.next();
 							
-							// The next note in the original ground truth voice is the next note in the ground truth voice
-							// We don't need to count this note if it has no following original ground truth. Those are checked later.
-							if (originalGroundTruthVoiceIterator.hasNext() &&
-									originalGroundTruthVoiceIterator.next().equals(groundTruthVoice.get(groundTruthNoteIndex + 1))) {
-								valueCheckNotes.add(transcriptionNote);
+							// Match found
+							if (nextTranscriptionNote.matches(nextGroundTruthNote)) {
+								connectionTruePositives++;
+								
+								groundTruthConnectionIterator.remove();
+								transcriptionConnectionIterator.remove();
+								break;
 							}
-							
-							break;
+						}
+					}
+					int connectionFalsePositives = nextTranscriptionNotes.size();
+					int connectionFalseNegatives = nextGroundTruthNotes.size();
+					
+					// Normalize counts before adding to totals, so that each connection is weighted equally
+					double total = connectionTruePositives + ((connectionFalsePositives + connectionFalseNegatives) / 2.0);
+					if (total > 0) {
+						double avgLength = (nextTranscriptionNotesFinal.size() + nextGroundTruthNotesFinal.size()) / 2.0;
+						voiceTruePositives += ((double) connectionTruePositives) / (total * avgLength);
+						voiceFalsePositives += ((double) connectionFalsePositives) / (total * avgLength);
+						voiceFalseNegatives += ((double) connectionFalseNegatives) / (total * avgLength);
+					}
+					
+					// Add note to list to noteValue check
+					
+					// List of notes which are linked to in the original ground truth (including multi-pitch non-TPs)
+					List<Note> nextOriginalGroundTruthNotes = new ArrayList<Note>();
+					for (NoteCluster nextGroundTruthCluster : voices.get(groundTruthNote.voice).getNoteCluster(groundTruthNote).nextClusters) {
+						for (Note nextGroundTruthNote : nextGroundTruthCluster.notes) {
+							nextOriginalGroundTruthNotes.add(nextGroundTruthNote);
 						}
 					}
 					
-				} else {
-					voiceFalsePositives++;
+					// Both are the end of a voice
+					if (nextOriginalGroundTruthNotes.isEmpty() && nextTranscriptionNotesFinal.isEmpty()) {
+						valueCheckNotes.add(transcriptionNote);
+						
+					} else {
+						// Check if at least one original ground truth connection was correct
+						boolean match = false;
+						for (Note nextGroundTruthNote : nextOriginalGroundTruthNotes) {
+							for (Note nextTranscriptionNote : nextTranscriptionNotesFinal) {
+								if (nextTranscriptionNote.matches(nextGroundTruthNote)) {
+									match = true;
+									valueCheckNotes.add(transcriptionNote);
+									break;
+								}
+							}
+							
+							if (match) {
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
-		
-		// Check if last notes in each voice should be checked for note value
-		for (List<Note> transcriptionVoice : transcriptionVoices) {
-			if (transcriptionVoice.isEmpty()) {
-				continue;
-			}
-			
-			// Find the last note in each transcribed voice
-			Note lastNote = transcriptionVoice.get(transcriptionVoice.size() - 1);
-			Note groundTruthNote = groundTruthNoteMapping.get(lastNote);
-			Voice originalGroundTruthVoice = voices.get(groundTruthNote.voice);
-			List<Note> originalGroundTruthNotes = originalGroundTruthVoice.getNotes();
-			
-			// Check if the index of the matched ground truth note is at the end of the original ground truth voice
-			if (Collections.binarySearch(originalGroundTruthNotes, groundTruthNote) ==
-					originalGroundTruthNotes.size() - 1) {
-				valueCheckNotes.add(lastNote);
-			}
-		}
-		
-		int voiceFalseNegatives = -voiceTruePositives;
-		for (List<Note> groundTruthVoice : groundTruthVoices) {
-			if (!groundTruthVoice.isEmpty()) {
-				voiceFalseNegatives += groundTruthVoice.size() - 1;
-			}
-		}
-		
 		double voiceF1 = Main.getF1(voiceTruePositives, voiceFalsePositives, voiceFalseNegatives);
 		
 		
