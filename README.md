@@ -33,6 +33,11 @@ To evaluate a time-aligned transcription and ground truth:
 
 ### Other File Formats
 #### MusicXML
+There is now a bash script that will perform this evaluation in one command: `evaluate_xml.bash gt.xml transcription.xml`
+
+It automatically removes all of the intermediate files as well. If you would like to save them, you can remove those lines
+from the script, or perform the process manually with the following steps:
+
 1. Convert MusicXML into a text-based format:  
 `./MusicXMLParser/MusicXMLToFmt1x gt.xml gt_xml.txt`  
 (The C++ converter must be compiled first using `./compile.sh` in the `MusicXMLParser` directory.)
