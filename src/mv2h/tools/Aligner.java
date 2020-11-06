@@ -34,24 +34,24 @@ public class Aligner {
 	 * note list to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 */
 	public static Set<List<Integer>> getPossibleAlignments(Music gt, Music m) {
-		double[][] distances = getAlignmentMatrix(gt.getNoteLists(), m.getNoteLists());
-		return getPossibleAlignmentsFromMatrix(distances.length - 1, distances[0].length - 1, distances);
+		List<List<List<Integer>>> previousCells = getAlignmentMatrix(gt.getNoteLists(), m.getNoteLists());
+		return getPossibleAlignmentsFromMatrix(previousCells.size() - 1, previousCells.get(0).size() - 1, previousCells);
 	}
 
 	/**
-	 * A recursive function to get all of the possible alignments which lead to
-	 * the optimal distance from the distance matrix returned by the heuristic-based DTW in
+	 * A recursive function to get all of the possible alignments from the previousCells
+	 * pointers returned by the heuristic-based DTW in
 	 * {@link #getAlignmentMatrix(List, List)}, up to matrix indices i, j.
 	 *
 	 * @param i The first index, representing the transcribed note index.
 	 * @param j The second index, representing the ground truth note index.
-	 * @param distances The full distances matrix from {@link #getAlignmentMatrix(List, List)}.
+	 * @param previousCells The previous cells matrix from {@link #getAlignmentMatrix(List, List)}.
 	 *
-	 * @return A Set of all possible alignments given the distance matrix, up to notes i, j.
+	 * @return A Set of all possible alignments given the previous cells matrix, up to notes i, j.
 	 * An alignment is a list containing, for each ground truth note list, the index of the transcription
 	 * note list to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 */
-	private static Set<List<Integer>> getPossibleAlignmentsFromMatrix(int i, int j, double[][] distances) {
+	private static Set<List<Integer>> getPossibleAlignmentsFromMatrix(int i, int j, List<List<List<Integer>>> previousCells) {
 		Set<List<Integer>> alignments = new HashSet<List<Integer>>();
 
 		// Base case. we are at the beginning and nothing else needs to be aligned.
@@ -60,34 +60,27 @@ public class Aligner {
 			return alignments;
 		}
 
-		double min = Math.min(Math.min(
-				i > 0 ? distances[i - 1][j] : Double.POSITIVE_INFINITY,
-				j > 0 ? distances[i][j - 1] : Double.POSITIVE_INFINITY),
-				i > 0 && j > 0 ? distances[i - 1][j - 1] : Double.POSITIVE_INFINITY);
+		for (int previousCell : previousCells.get(i).get(j)) {
+			if (previousCell == -1) {
+				// This transcription note was aligned with nothing in the ground truth. Add -1.
+				for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j, previousCells)) {
+					list.add(-1);
+					alignments.add(list);
+				}
 
-		// Note that we could perform multiple of these if blocks.
+			} else if (previousCell == 1) {
+				// This ground truth note was aligned with nothing in the transcription. Skip it.
+				for (List<Integer> list : getPossibleAlignmentsFromMatrix(i, j - 1, previousCells)) {
+					alignments.add(list);
+				}
 
-		// This transcription note was aligned with nothing in the ground truth. Add -1.
-		if (distances[i - 1][j] == min) {
-			for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j, distances)) {
-				list.add(-1);
-				alignments.add(list);
-			}
-		}
-
-		// This ground truth note was aligned with nothing in the transcription. Skip it.
-		if (distances[i][j - 1] == min) {
-			for (List<Integer> list : getPossibleAlignmentsFromMatrix(i, j - 1, distances)) {
-				alignments.add(list);
-			}
-		}
-
-		// The current transcription and ground truth notes were aligned. Add the current ground
-		// truth index to the alignment list.
-		if (distances[i - 1][j - 1] == min) {
-			for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j - 1, distances)) {
-				list.add(j - 1); // j - 2, because (j-1) is aligned, and the distance matrix starts from 1.
-				alignments.add(list);
+			} else {
+				// The current transcription and ground truth notes were aligned. Add the current ground
+				// truth index to the alignment list.
+				for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j - 1, previousCells)) {
+					list.add(j - 1);
+					alignments.add(list);
+				}
 			}
 		}
 
@@ -95,22 +88,32 @@ public class Aligner {
 	}
 
 	/**
-	 * Get the Dynamic Time Warping distance matrix from the note lists.
+	 * Get the Dynamic Time Warping alignment paths from the note lists.
 	 * <br>
-	 * During calculation, we add an additional 0.01 penalty to any aligned note whose previous
+	 * During calculation, we add an additional 0.6 penalty to any aligned note whose previous
 	 * notes (in both ground truth and transcription) were not aligned. This is used to prefer
 	 * alignments which align many consecutive notes.
 	 *
 	 * @param gtNotes The ground truth note lists, split by onset time.
 	 * @param mNotes The transcribed note lists, split by onset time.
 	 *
-	 * @return The DTW distance matrix.
+	 * @return A List of the previous step's aligned cells for each cell in the alignment matrix.
 	 */
-	private static double[][] getAlignmentMatrix(List<List<Note>> gtNotes, List<List<Note>> mNotes) {
+	private static List<List<List<Integer>>> getAlignmentMatrix(List<List<Note>> gtNotes, List<List<Note>> mNotes) {
 		List<Map<Integer, Integer>> gtNoteMaps = getNotePitchMaps(gtNotes);
 		List<Map<Integer, Integer>> mNoteMaps = getNotePitchMaps(mNotes);
 
 		double[][] distances = new double[gtNotes.size() + 1][mNotes.size() + 1];
+
+		List<List<List<Integer>>> previousCells = new ArrayList<List<List<Integer>>>(gtNotes.size() + 1);
+		for (int i = 0; i < gtNotes.size() + 1; i++) {
+			List<List<Integer>> list = new ArrayList<List<Integer>>(mNotes.size() + 1);
+			for (int j = 0; j < mNotes.size() + 1; j++) {
+				list.add(new ArrayList<Integer>(3));
+			}
+
+			previousCells.add(list);
+		}
 
 		for (int i = 1; i < distances.length; i++) {
 			distances[i][0] = Double.POSITIVE_INFINITY;
@@ -120,21 +123,34 @@ public class Aligner {
 			distances[0][j] = Double.POSITIVE_INFINITY;
 		}
 
-		boolean useProgressBar = distances[0].length >= 100;
-
 		for (int j = 1; j < distances[0].length; j++) {
 			for (int i = 1; i < distances.length; i++) {
 				double distance = getDistance(gtNoteMaps.get(i - 1), mNoteMaps.get(j - 1));
 
-				double min = Math.min(Math.min(
-						distances[i - 1][j] + 0.6,
-						distances[i][j - 1] + 0.6),
-						distances[i - 1][j - 1] + distance);
-				distances[i][j] = min;
+				double distance_i_1 = distances[i - 1][j] + 0.6;
+				double distance_j_1 = distances[i][j - 1] + 0.6;
+				double distance_i_j_1 = distances[i - 1][j - 1] + distance;
+
+				double min_distance = Math.min(Math.min(distance_i_1, distance_j_1), distance_i_j_1);
+
+				List<Integer> previousCell = previousCells.get(i).get(j);
+				if (distance_i_1 == min_distance) {
+					previousCell.add(-1);
+				}
+
+				if (distance_j_1 == min_distance) {
+					previousCell.add(1);
+				}
+
+				if (distance_i_j_1 == min_distance) {
+					previousCell.add(0);
+				}
+
+				distances[i][j] = min_distance;
 			}
 		}
 
-		return distances;
+		return previousCells;
 	}
 
 	/**
@@ -217,7 +233,12 @@ public class Aligner {
 	 *
 	 * @return A time converted from transcription scale to ground truth scale.
 	 */
-	public static int convertTime(int time, Music gt, Music transcription, List<Integer> alignment) {
+	public static int convertTime(int time, Music gt, Music transcription, List<Integer> alignment, Map<Integer, Integer> alignedTimes) {
+		Integer alignedTime = alignedTimes.get(time);
+		if (alignedTime != null) {
+			return alignedTime;
+		}
+
 		double transcriptionIndex = -1;
 		List<List<Note>> transcriptionNotes = transcription.getNoteLists();
 
@@ -275,31 +296,37 @@ public class Aligner {
 
 		if (gtPreviousAnchor == -1 && gtNextAnchor == gtNotes.size()) {
 			// Nothing was aligned
+			alignedTimes.put(time, time);
 			return time;
 		}
 
 		if (gtPreviousAnchor == -1 ) {
 			// Time is before the first anchor. Use the rate from the first anchor.
 			if (gtNextNextAnchor != gtNotes.size()) {
-				return convertTime(time, gtNextAnchor, gtNextNextAnchor, gtNotes, transcriptionNotes, alignment);
-			}
+				alignedTime = convertTime(time, gtNextAnchor, gtNextNextAnchor, gtNotes, transcriptionNotes, alignment);
 
-			// Only 1 anchor. Just linear shift.
-			return time - transcriptionNotes.get(alignment.get(gtNextAnchor)).get(0).valueOnsetTime + gtNotes.get(gtNextAnchor).get(0).valueOnsetTime;
+			} else {
+				// Only 1 anchor. Just linear shift.
+				alignedTime = time - transcriptionNotes.get(alignment.get(gtNextAnchor)).get(0).valueOnsetTime + gtNotes.get(gtNextAnchor).get(0).valueOnsetTime;
+			}
 
 		} else if (gtNextAnchor == gtNotes.size()) {
 			// Time is after the last anchor. Use the previous rate.
 			if (gtPreviousPreviousAnchor != -1) {
-				return convertTime(time, gtPreviousPreviousAnchor, gtPreviousAnchor, gtNotes, transcriptionNotes, alignment);
-			}
+				alignedTime = convertTime(time, gtPreviousPreviousAnchor, gtPreviousAnchor, gtNotes, transcriptionNotes, alignment);
 
-			// Only 1 anchor. Just linear shift.
-			return time - transcriptionNotes.get(alignment.get(gtPreviousAnchor)).get(0).valueOnsetTime + gtNotes.get(gtPreviousAnchor).get(0).valueOnsetTime;
+			} else {
+				// Only 1 anchor. Just linear shift.
+				alignedTime = time - transcriptionNotes.get(alignment.get(gtPreviousAnchor)).get(0).valueOnsetTime + gtNotes.get(gtPreviousAnchor).get(0).valueOnsetTime;
+			}
 
 		} else {
 			// Time is between anchor points.
-			return convertTime(time, gtPreviousAnchor, gtNextAnchor, gtNotes, transcriptionNotes, alignment);
+			alignedTime = convertTime(time, gtPreviousAnchor, gtNextAnchor, gtNotes, transcriptionNotes, alignment);
 		}
+
+		alignedTimes.put(time, alignedTime);
+		return alignedTime;
 	}
 
 	/**
