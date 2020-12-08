@@ -1,11 +1,9 @@
 package mv2h.tools;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import mv2h.Main;
@@ -29,13 +27,25 @@ public class Aligner {
 	 * @param gt The ground truth.
 	 * @param m The transcription.
 	 *
-	 * @return A Set of all possible alignments of the transcription to the ground truth.
-	 * An alignment is a list containing, for each ground truth note list, the index of the transcription
-	 * note list to which it is aligned, or -1 if it was not aligned with any transcription note.
+	 * @return A List of all possible alignments of the transcription to the ground truth.
+	 * An alignment is a list containing, for each ground truth note, the index of the transcription
+	 * note to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 */
-	public static Set<List<Integer>> getPossibleAlignments(Music gt, Music m) {
+	public static List<AlignmentNode> getPossibleAlignments(Music gt, Music m) {
+		System.out.println("Calculating alignment matrix...");
 		List<List<List<Integer>>> previousCells = getAlignmentMatrix(gt.getNoteLists(), m.getNoteLists());
-		return getPossibleAlignmentsFromMatrix(previousCells.size() - 1, previousCells.get(0).size() - 1, previousCells);
+
+		System.out.println("Calculating alignment paths...");
+		List<List<List<AlignmentNode>>> alignmentCache = new ArrayList<List<List<AlignmentNode>>>(previousCells.size());
+		for (int i = 0; i < previousCells.size(); i++) {
+			List<List<AlignmentNode>> nestedList = new ArrayList<List<AlignmentNode>>(previousCells.get(0).size());
+			for (int j = 0; j < previousCells.get(0).size(); j++) {
+				nestedList.add(new ArrayList<AlignmentNode>());
+			}
+			alignmentCache.add(nestedList);
+		}
+
+		return getPossibleAlignmentsFromMatrix(previousCells.size() - 1, previousCells.get(0).size() - 1, previousCells, alignmentCache);
 	}
 
 	/**
@@ -47,39 +57,39 @@ public class Aligner {
 	 * @param j The second index, representing the ground truth note index.
 	 * @param previousCells The previous cells matrix from {@link #getAlignmentMatrix(List, List)}.
 	 *
-	 * @return A Set of all possible alignments given the previous cells matrix, up to notes i, j.
+	 * @return A List of all possible alignments given the previous cells matrix, up to notes i, j.
 	 * An alignment is a list containing, for each ground truth note list, the index of the transcription
 	 * note list to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 */
-	private static Set<List<Integer>> getPossibleAlignmentsFromMatrix(int i, int j, List<List<List<Integer>>> previousCells) {
-		Set<List<Integer>> alignments = new HashSet<List<Integer>>();
+	private static List<AlignmentNode> getPossibleAlignmentsFromMatrix(int i, int j, List<List<List<Integer>>> previousCells, List<List<List<AlignmentNode>>> alignmentCache) {
+		List<AlignmentNode> alignments = alignmentCache.get(i).get(j);
+		if (!alignments.isEmpty()) {
+			return alignments;
+		}
 
 		// Base case. we are at the beginning and nothing else needs to be aligned.
 		if (i == 0 && j == 0) {
-			alignments.add(new ArrayList<Integer>());
+			alignments.add(null);
 			return alignments;
 		}
 
 		for (int previousCell : previousCells.get(i).get(j)) {
 			if (previousCell == -1) {
-				// This transcription note was aligned with nothing in the ground truth. Add -1.
-				for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j, previousCells)) {
-					list.add(-1);
-					alignments.add(list);
+				// This transcription note was aligned with nothing in the ground truth.
+				for (AlignmentNode prev : getPossibleAlignmentsFromMatrix(i - 1, j, previousCells, alignmentCache)) {
+					alignments.add(new AlignmentNode(prev, -1));
 				}
 
 			} else if (previousCell == 1) {
-				// This ground truth note was aligned with nothing in the transcription. Skip it.
-				for (List<Integer> list : getPossibleAlignmentsFromMatrix(i, j - 1, previousCells)) {
-					alignments.add(list);
+				// This ground truth note was aligned with nothing in the transcription.
+				for (AlignmentNode prev : getPossibleAlignmentsFromMatrix(i, j - 1, previousCells, alignmentCache)) {
+					alignments.add(new AlignmentNode(prev, AlignmentNode.NO_ALIGNMENT));
 				}
 
 			} else {
-				// The current transcription and ground truth notes were aligned. Add the current ground
-				// truth index to the alignment list.
-				for (List<Integer> list : getPossibleAlignmentsFromMatrix(i - 1, j - 1, previousCells)) {
-					list.add(j - 1);
-					alignments.add(list);
+				// The current transcription and ground truth notes were aligned.
+				for (AlignmentNode prev : getPossibleAlignmentsFromMatrix(i - 1, j - 1, previousCells, alignmentCache)) {
+					alignments.add(new AlignmentNode(prev, j - 1));
 				}
 			}
 		}

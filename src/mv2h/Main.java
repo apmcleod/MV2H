@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import mv2h.objects.MV2H;
 import mv2h.objects.Music;
 import mv2h.objects.Note;
 import mv2h.tools.Aligner;
+import mv2h.tools.AlignmentNode;
 
 /**
  * The <code>Main</code> class is the class called to evaluate anything with the MV2H package.
@@ -180,10 +180,12 @@ public class Main {
 			MV2H best = new MV2H(0, 0, 0, 0, 0);
 			List<Integer> bestAlignment = new ArrayList<Integer>();
 
-			Set<List<Integer>> alignments = Aligner.getPossibleAlignments(groundTruth, transcription);
+			List<AlignmentNode> alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
 			int i = 0;
-			for (List<Integer> alignment : alignments) {
-				System.out.print("Evaluating alignment " + (i++) + " / " + alignments.size() + "\r");
+			for (AlignmentNode alignmentNode : alignmentNodes) {
+				System.out.print("Evaluating alignment " + (++i) + " / " + alignmentNodes.size() + "\r");
+
+				List<Integer> alignment = alignmentNode.getAlignment();
 
 				MV2H candidate = groundTruth.evaluateTranscription(transcription.align(groundTruth, alignment));
 
@@ -192,6 +194,7 @@ public class Main {
 					bestAlignment = alignment;
 				}
 			}
+			System.out.println();
 
 			if (PRINT_ALIGNMENT) {
 				System.out.println("ALIGNMENT");
