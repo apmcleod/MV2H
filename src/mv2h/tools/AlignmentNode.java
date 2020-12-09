@@ -12,9 +12,9 @@ import java.util.List;
  */
 public class AlignmentNode {
     /**
-     * The previous AlignmentNode in the backwards-linked list.
+     * A List of previous AlignmentNodes in the backwards-linked list.
      */
-    public final AlignmentNode prev;
+    public final List<AlignmentNode> prevList;
 
     /**
      * The value to add to the alignment list for this node. Use {@link #NO_ALIGNMENT}
@@ -23,35 +23,60 @@ public class AlignmentNode {
     public final int value;
 
     /**
-     * The value to use to designate no aligned transcription note.
+     * How many alignment lists pass through this node.
      */
-	public static final int NO_ALIGNMENT = -2;
+    public final int count;
 
     /**
      * Create a new AlignmentNode.
      *
-     * @param prev {@link #prev}
+     * @param prevList {@link #prevList}
      * @param value {@link #value}
      */
-	public AlignmentNode(AlignmentNode prev, int value) {
-		this.prev = prev;
-		this.value = value;
+	public AlignmentNode(List<AlignmentNode> prevList, int value) {
+		this.prevList = prevList;
+        this.value = value;
+
+        int count = 0;
+        for (AlignmentNode prev : this.prevList) {
+            count += prev.count;
+        }
+        this.count = Math.max(count, 1);
 	}
 
     /**
-     * Generate the alignment list from the node.
+     * Generate an alignment list from the node.
+     *
+     * @param index The index of the alignment node to return (since multiple lists pass
+     * through this node).
      *
      * @return An alignment for this node.
      * An alignment is a list containing, for each ground truth note, the index of the transcription
 	 * note to which it is aligned, or -1 if it was not aligned with any transcription note.
      */
-	public List<Integer> getAlignment() {
-		List<Integer> list = prev == null ? new ArrayList<Integer>() : prev.getAlignment();
+	public List<Integer> getAlignment(int index) {
+        List<Integer> alignment = null;
 
-		if (value != NO_ALIGNMENT) {
-			list.add(value);
-		}
+        if (prevList.isEmpty()) {
+            // Base case
+            alignment = new ArrayList<Integer>();
 
-		return list;
+        } else {
+            // Find the correct previous node based on the index
+            for (AlignmentNode prev : prevList) {
+                if (index < prev.count) {
+                    // Previous node found. Get prev list.
+                    alignment = prev.getAlignment(index);
+                    break;
+                }
+
+                // Previous node not yet found. Decrememnt index and find the previous list.
+                index -= prev.count;
+            }
+        }
+
+        alignment.add(value);
+
+		return alignment;
 	}
 }

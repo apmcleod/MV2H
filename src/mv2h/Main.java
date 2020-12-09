@@ -181,17 +181,24 @@ public class Main {
 			List<Integer> bestAlignment = new ArrayList<Integer>();
 
 			List<AlignmentNode> alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
+			int total = 0;
+			for (AlignmentNode alignmentNode : alignmentNodes) {
+				total += alignmentNode.count;
+			}
+
 			int i = 0;
 			for (AlignmentNode alignmentNode : alignmentNodes) {
-				System.out.print("Evaluating alignment " + (++i) + " / " + alignmentNodes.size() + "\r");
+				for (int alignmentIndex = 0; alignmentIndex < alignmentNode.count; alignmentIndex++) {
+					System.out.print("Evaluating alignment " + (++i) + " / " + total + "\r");
 
-				List<Integer> alignment = alignmentNode.getAlignment();
+					List<Integer> alignment = alignmentNode.getAlignment(alignmentIndex);
 
-				MV2H candidate = groundTruth.evaluateTranscription(transcription.align(groundTruth, alignment));
+					MV2H candidate = groundTruth.evaluateTranscription(transcription.align(groundTruth, alignment));
 
-				if (candidate.compareTo(best) > 0) {
-					best = candidate;
-					bestAlignment = alignment;
+					if (candidate.compareTo(best) > 0) {
+						best = candidate;
+						bestAlignment = alignment;
+					}
 				}
 			}
 			System.out.println();

@@ -69,28 +69,25 @@ public class Aligner {
 
 		// Base case. we are at the beginning and nothing else needs to be aligned.
 		if (i == 0 && j == 0) {
-			alignments.add(null);
 			return alignments;
 		}
 
 		for (int previousCell : previousCells.get(i).get(j)) {
 			if (previousCell == -1) {
 				// This transcription note was aligned with nothing in the ground truth.
-				for (AlignmentNode prev : getPossibleAlignmentsFromMatrix(i - 1, j, previousCells, alignmentCache)) {
-					alignments.add(new AlignmentNode(prev, -1));
-				}
+				alignments.add(new AlignmentNode(getPossibleAlignmentsFromMatrix(i - 1, j, previousCells, alignmentCache), -1));
 
 			} else if (previousCell == 1) {
 				// This ground truth note was aligned with nothing in the transcription.
 				for (AlignmentNode prev : getPossibleAlignmentsFromMatrix(i, j - 1, previousCells, alignmentCache)) {
-					alignments.add(new AlignmentNode(prev, AlignmentNode.NO_ALIGNMENT));
+					if (prev.value != -1) {
+						alignments.add(prev);
+					}
 				}
 
 			} else {
 				// The current transcription and ground truth notes were aligned.
-				for (AlignmentNode prev : getPossibleAlignmentsFromMatrix(i - 1, j - 1, previousCells, alignmentCache)) {
-					alignments.add(new AlignmentNode(prev, j - 1));
-				}
+				alignments.add(new AlignmentNode(getPossibleAlignmentsFromMatrix(i - 1, j - 1, previousCells, alignmentCache), j - 1));
 			}
 		}
 
