@@ -220,7 +220,6 @@ public class Main {
 					}
 				}
 			}
-			System.out.println();
 
 			if (PRINT_ALIGNMENT) {
 				System.out.println("ALIGNMENT");

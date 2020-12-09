@@ -32,10 +32,8 @@ public class Aligner {
 	 * note to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 */
 	public static List<AlignmentNode> getPossibleAlignments(Music gt, Music m) {
-		System.out.println("Calculating alignment matrix...");
 		List<List<List<Integer>>> previousCells = getAlignmentMatrix(gt.getNoteLists(), m.getNoteLists());
 
-		System.out.println("Calculating alignment paths...");
 		List<List<List<AlignmentNode>>> alignmentCache = new ArrayList<List<List<AlignmentNode>>>(previousCells.size());
 		for (int i = 0; i < previousCells.size(); i++) {
 			List<List<AlignmentNode>> nestedList = new ArrayList<List<AlignmentNode>>(previousCells.get(0).size());
