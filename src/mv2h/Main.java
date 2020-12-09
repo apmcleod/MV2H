@@ -61,6 +61,13 @@ public class Main {
 	private static boolean PRINT_ALIGNMENT = false;
 
 	/**
+	 * The penalty assigned for insertion and deletion errors when performing alignment.
+	 * The default value of <code>1</code> leads to a reasonably fast, but not exhaustive
+	 * search through alignments. Can be set with the <code>-p</code> flag.
+	 */
+	public static double NON_ALIGNMENT_PENALTY = 1.0;
+
+	/**
 	 * Run the program. There are 2 different modes.
 	 * <br>
 	 * 1. Perform an evaluation:
@@ -110,6 +117,18 @@ public class Main {
 							ONSET_DELTA = 0;
 							GROUPING_EPSILON = 20;
 							PERFORM_ALIGNMENT = true;
+							break;
+
+						case 'p':
+							i++;
+							if (args.length <= i) {
+								argumentError("No non-alignment penalty given with -p.");
+							}
+							try {
+								NON_ALIGNMENT_PENALTY = Double.parseDouble(args[i]);
+							} catch (NumberFormatException e) {
+								argumentError("Non-alignment penalty must be a decimal value. Given: " + args[i]);
+							}
 							break;
 
 						// Evaluate!
@@ -392,7 +411,9 @@ public class Main {
 
 		sb.append("-g FILE = Use the given FILE as the ground truth (defaults to std in).\n");
 		sb.append("-t FILE = Use the given FILE as the transcription (defaults to std in).\n");
-		sb.append("Either -g or -t (or both) must be given to evaluate, since both cannot be read from std in.\n");
+		sb.append("Either -g or -t (or both) must be given to evaluate, since both cannot be read from std in.\n\n");
+
+		sb.append("-p DOUBLE = Use the given value as the insertion and deletion penalty for alignment.\n");
 
 		sb.append("-F = Combine the scores from std in (from this program's output) into final");
 		sb.append(" global mean and standard deviation distributions for each score.\n");

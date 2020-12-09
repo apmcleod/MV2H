@@ -134,8 +134,8 @@ public class Aligner {
 			for (int i = 1; i < distances.length; i++) {
 				double distance = getDistance(gtNoteMaps.get(i - 1), mNoteMaps.get(j - 1));
 
-				double distance_i_1 = distances[i - 1][j] + 0.6;
-				double distance_j_1 = distances[i][j - 1] + 0.6;
+				double distance_i_1 = distances[i - 1][j] + Main.NON_ALIGNMENT_PENALTY;
+				double distance_j_1 = distances[i][j - 1] + Main.NON_ALIGNMENT_PENALTY;
 				double distance_i_j_1 = distances[i - 1][j - 1] + distance;
 
 				double min_distance = Math.min(Math.min(distance_i_1, distance_j_1), distance_i_j_1);
