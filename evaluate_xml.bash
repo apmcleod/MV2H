@@ -5,13 +5,12 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-./MusicXMLParser/MusicXMLToFmt1x $1 $1.txt
-java -cp bin mv2h.tools.Converter -x <$1.txt >$1.conv.txt
-rm $1.txt
+musescore3 -o $1.mid $1
+musescore3 -o $2.mid $2
 
-./MusicXMLParser/MusicXMLToFmt1x $2 $2.txt
-java -cp bin mv2h.tools.Converter -x <$2.txt >$2.conv.txt
-rm $2.txt
+java -cp bin mv2h.tools.Converter -i $1.mid -o $1.mid.txt
+java -cp bin mv2h.tools.Converter -i $2.mid -o $2.mid.txt
+rm $1.mid $2.mid
 
-java -cp bin mv2h.Main -g $1.conv.txt -t $2.conv.txt -a
-rm $1.conv.txt $2.conv.txt
+java -cp bin mv2h.Main -g $1.mid.txt -t $2.mid.txt -a
+rm $1.mid.txt $2.mid.txt
