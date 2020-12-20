@@ -4,6 +4,7 @@ This is the code for the MV2H metric, originally proposed in my 2018 ISMIR paper
 
 - [v2.0](https://github.com/apmcleod/MV2H/releases/tag/v2.0) added support for non-time-aligned transcriptions (i.e. musical score to musical score evaluation), as detailed in the technical report on [arXiv](https://arxiv.org/abs/1906.00566).
 - [v2.1](https://github.com/apmcleod/MV2H/releases/tag/v2.1) added support for evaluating homophonic and polyphonic voice separation (see [Homophony.md](https://github.com/apmcleod/MV2H/blob/master/Homophony.md)).
+- [v2.2](https://github.com/apmcleod/MV2H/releases/tag/v2.2) added the ability to tune the insertion/deletion penalty during DTW alignment, fixed a bug with time signatures with small denominators (e.g. 2 or 1), and sped up the DTW process significantly.
 
 If you use the metric, please cite it:
 
@@ -33,36 +34,22 @@ To evaluate a time-aligned transcription and ground truth:
 
 ### Other File Formats
 #### MusicXML
-There is now a bash script that will perform this evaluation in one command: `evaluate_xml.bash gt.xml transcription.xml`
+There is now a bash script that will perform this evaluation in one command (if you have musescore3): `evaluate_xml.bash gt.xml transcription.xml`
 
-It automatically removes all of the intermediate files as well. If you would like to save them, you can remove those lines
-from the script, or perform the process manually with the following steps:
-
-1. Convert MusicXML into a text-based format:
-`./MusicXMLParser/MusicXMLToFmt1x gt.xml gt_xml.txt`
-(The C++ converter must be compiled first using `./compile.sh` in the `MusicXMLParser` directory.)
-
-2. Convert that text-based format into the MV2H format:
-`java -cp bin mv2h.tools.Converter -x <gt_xml.txt >gt_converted.txt`
-Input and output files can also be specified with `-i FILE` and `-o FILE`.
-Different parsed voices can be generated using `--part` (instrument/part), `--staff`, and/or `--voice`. Default uses all 3.
-
-3. Evaluate with alignment using the `-a` flag:
-`java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
-
-Chord symbols will not be parsed, and all key signatures will be major.
-
-See [Dataset](#dataset) for examples.
+You can also perform the process manually by first converting the MusicXML files into MIDI, and then following the [instructions for MIDI files](#MIDI).
+ - The recommended way to convert MusicXML to MIDI is to use Musescore3:
+`musescore3 -o file.mid file.xml`
+ - Other methods may also work, but not all will handle anacrusis (pick-up) measures correctly (`music21`, for example, did not when I tested it and will require manual setting during the MIDI conversion with `-a INT`).
+ - MusicXML files without a time signature are treated as 4/4.
 
 #### MIDI
 1. Convert a MIDI file into the MV2H format:
-`java -cp bin mv2h.tools.Converter -m -i gt.mid >gt_converted.txt`
-`-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats.
-`-o FILE` can also be used to specify an output file (instead of standard output).
-Different parsed voices can be generated using `--track` or `--channel`. Default uses both.
+`java -cp bin mv2h.tools.Converter -m -i gt.mid -o gt_converted.txt`
+`-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats, in case it is not aligned correctly in the MIDI.
+Different parsed voices can be generated using `--channel` or `--track`. Default uses both.
 
 2. Evaluate with alignment using the `-a` flag:
-`java -cp bin mv2h.Main -g gt_converted.txt -t trans_converted.txt -a`
+`java -cp bin mv2h.Main -g gt_converted.txt -t transcription_converted.txt -a`
 
 Chord symbols will not be parsed.
 
