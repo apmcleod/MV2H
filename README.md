@@ -26,7 +26,12 @@ To compile the code, simply run `make` in the base directory.
 
 ### Non-aligned Data
 Use the `-a` flag to evaluate a non-time-aligned transcription:
-* `java -cp bin mv2h.Main -g gt.txt -t transcription.txt -a`
+* `java -cp bin mv2h.Main -g gt.txt -t transcription.txt [-a|-A] [-p DOUBLE]`
+
+* `-a` or `-A`: Perform normal (`-a`) or verbose (`-A`, will also print out note-by-note alignment details) alignment.
+
+* `-p DOUBLE` (new in v2.2): Set the DTW insertion and deletion penalties to the given `DOUBLE` (default 1.0).  
+Higher values will force the DTW alignment to align as many notes as possible, even if they don't match well. Lower values will make it only rarely align notes that don't match exactly.
 
 ### Aligned Data
 To evaluate a time-aligned transcription and ground truth:
