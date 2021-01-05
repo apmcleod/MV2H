@@ -68,7 +68,12 @@ public class Main {
 	public static double NON_ALIGNMENT_PENALTY = 1.0;
 
 	/**
-	 * Run the program. There are 2 different modes.
+	 * Use verbose printing.
+	 */
+	public static boolean VERBOSE = false;
+
+	/**
+	 * Run the program. There are 2 different modes. Each can be made verbose with <code>-v</code>.
 	 * <br>
 	 * 1. Perform an evaluation:
 	 * <ul>
@@ -76,6 +81,7 @@ public class Main {
 	 * <li><code>-t FILE</code> = The transcription file.</li>
 	 * <li><code>-a</code> = Perform alignment.</li>
 	 * <li><code>-A</code> = Perform and print alignment.</li>
+	 * <li><code>-p DOUBLE</code> = Set the DTW insertion and deletion penalty.</li>
 	 * </ul>
 	 * <br>
 	 * 2. Get the means and standard deviations of many outputs of this program
@@ -160,6 +166,10 @@ public class Main {
 							}
 							break;
 
+						case 'v':
+							VERBOSE = true;
+							break;
+
 						// Error
 						default:
 							argumentError("Unrecognized option: " + args[i]);
@@ -200,19 +210,27 @@ public class Main {
 			List<Integer> bestAlignment = new ArrayList<Integer>();
 
 			List<AlignmentNode> alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
-			int total = 0;
+			long total = 0;
 			for (AlignmentNode alignmentNode : alignmentNodes) {
 				total += alignmentNode.count;
 			}
 
-			int i = 0;
+			long i = 0;
+			String lineEnding = VERBOSE ? "\n" : "\r";
 			for (AlignmentNode alignmentNode : alignmentNodes) {
 				for (int alignmentIndex = 0; alignmentIndex < alignmentNode.count; alignmentIndex++) {
-					System.out.print("Evaluating alignment " + (++i) + " / " + total + "\r");
+					System.out.print("Evaluating alignment " + (++i) + " / " + total + lineEnding);
 
 					List<Integer> alignment = alignmentNode.getAlignment(alignmentIndex);
 
 					MV2H candidate = groundTruth.evaluateTranscription(transcription.align(groundTruth, alignment));
+
+					if (VERBOSE) {
+						if (PRINT_ALIGNMENT) {
+							System.out.println(getAlignmentString(groundTruth, transcription, alignment));
+						}
+						System.out.println(candidate);
+					}
 
 					if (candidate.compareTo(best) > 0) {
 						best = candidate;
@@ -220,42 +238,19 @@ public class Main {
 					}
 				}
 			}
+			System.out.println();
 
 			if (PRINT_ALIGNMENT) {
-				System.out.println("ALIGNMENT");
+				System.out.println("BEST ALIGNMENT         ");
+				System.out.println("==============");
+
+				System.out.println(getAlignmentString(groundTruth, transcription, bestAlignment));
+				System.out.println();
+			}
+
+			if (VERBOSE || PRINT_ALIGNMENT) {
+				System.out.println("BEST MV2H");
 				System.out.println("=========");
-
-				List<List<Note>> nonAlignedNotes = new ArrayList<List<Note>>();
-
-				System.out.println("Aligned notes (transcribed -> ground truth):");
-				for (int noteIndex = 0; noteIndex < transcription.getNoteLists().size(); noteIndex++) {
-					int alignment = bestAlignment.indexOf(noteIndex);
-
-					if (alignment == -1) {
-						nonAlignedNotes.add(transcription.getNoteLists().get(noteIndex));
-					} else {
-						System.out.println(transcription.getNoteLists().get(noteIndex) + " -> " +
-								(alignment == -1 ? "nothing." : groundTruth.getNoteLists().get(alignment)));
-					}
-				}
-				System.out.println();
-
-				System.out.println("Non-aligned transcription notes:");
-				for (List<Note> notes : nonAlignedNotes) {
-					System.out.println(notes);
-				}
-				System.out.println();
-
-				System.out.println("Non-aligned ground truth notes:");
-				for (int noteIndex = 0; noteIndex < groundTruth.getNoteLists().size(); noteIndex++) {
-					if (bestAlignment.get(noteIndex) == -1) {
-						System.out.println(groundTruth.getNoteLists().get(noteIndex));
-					}
-				}
-				System.out.println();
-
-				System.out.println("MV2H");
-				System.out.println("====");
 			}
 
 			System.out.println(best);
@@ -264,6 +259,39 @@ public class Main {
 			// No alignment
 			System.out.println(groundTruth.evaluateTranscription(transcription));
 		}
+	}
+
+	/**
+	 * Generate and return a verbose alignment string for the given alignment.
+	 *
+	 * @param groundTruth The ground truth piece that is aligned to.
+	 * @param transcription The transcription that has been aligned to the ground truth.
+	 * @param alignmentToPrint The alignment List to convert to a printable String.
+	 * @return The String to print for the given alignment.
+	 */
+	private static String getAlignmentString(Music groundTruth, Music transcription, List<Integer> alignmentToPrint) {
+		StringBuilder sb = new StringBuilder("Aligned notes (transcribed -> ground truth):\n");
+
+		List<List<Note>> nonAlignedNotes = new ArrayList<List<Note>>();
+		for (int noteIndex = 0; noteIndex < transcription.getNoteLists().size(); noteIndex++) {
+			int alignment = alignmentToPrint.indexOf(noteIndex);
+
+			if (alignment == -1) {
+				nonAlignedNotes.add(transcription.getNoteLists().get(noteIndex));
+			} else {
+				sb.append(transcription.getNoteLists().get(noteIndex) + " -> " +
+						  (alignment == -1 ? "nothing." : groundTruth.getNoteLists().get(alignment)));
+				sb.append('\n');
+			}
+		}
+
+		sb.append("\nNon-aligned transcription notes:");
+		for (List<Note> notes : nonAlignedNotes) {
+			sb.append('\n');
+			sb.append(notes);
+		}
+
+		return sb.toString();
 	}
 
 	/**
@@ -413,6 +441,8 @@ public class Main {
 		sb.append("Either -g or -t (or both) must be given to evaluate, since both cannot be read from std in.\n\n");
 
 		sb.append("-p DOUBLE = Use the given value as the insertion and deletion penalty for alignment.\n");
+		sb.append("-v = Use verbose printing. With -a, this will the evaluation score of every possible alignment. " +
+		          "With -A, this will also print each alignment.\n\n");
 
 		sb.append("-F = Combine the scores from std in (from this program's output) into final");
 		sb.append(" global mean and standard deviation distributions for each score.\n");
