@@ -2,6 +2,7 @@ package mv2h.tools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigInteger;
 
 /**
  * The <code>AlignmentNode</code> class is used to help when aligning musical scores
@@ -25,7 +26,7 @@ public class AlignmentNode {
     /**
      * How many alignment lists pass through this node.
      */
-    public final int count;
+    public final BigInteger count;
 
     /**
      * Create a new AlignmentNode.
@@ -37,11 +38,11 @@ public class AlignmentNode {
 		this.prevList = prevList;
         this.value = value;
 
-        int count = 0;
+        BigInteger count = new BigInteger("0");
         for (AlignmentNode prev : this.prevList) {
-            count += prev.count;
+            count = count.add(prev.count);
         }
-        this.count = Math.max(count, 1);
+        this.count = count.max(new BigInteger("1"));
 	}
 
     /**
@@ -54,7 +55,7 @@ public class AlignmentNode {
      * An alignment is a list containing, for each ground truth note, the index of the transcription
 	 * note to which it is aligned, or -1 if it was not aligned with any transcription note.
      */
-	public List<Integer> getAlignment(int index) {
+	public List<Integer> getAlignment(BigInteger index) {
         List<Integer> alignment = null;
 
         if (prevList.isEmpty()) {
@@ -64,14 +65,14 @@ public class AlignmentNode {
         } else {
             // Find the correct previous node based on the index
             for (AlignmentNode prev : prevList) {
-                if (index < prev.count) {
+                if (index.compareTo(prev.count) < 0) {
                     // Previous node found. Get prev list.
                     alignment = prev.getAlignment(index);
                     break;
                 }
 
                 // Previous node not yet found. Decrememnt index and find the previous list.
-                index -= prev.count;
+                index = index.subtract(prev.count);
             }
         }
 

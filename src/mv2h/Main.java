@@ -2,6 +2,7 @@ package mv2h;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -210,16 +211,17 @@ public class Main {
 			List<Integer> bestAlignment = new ArrayList<Integer>();
 
 			List<AlignmentNode> alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
-			long total = 0;
+			BigInteger total = new BigInteger("0");
 			for (AlignmentNode alignmentNode : alignmentNodes) {
-				total += alignmentNode.count;
+				total = total.add(alignmentNode.count);
 			}
 
-			long i = 0;
+			BigInteger i = new BigInteger("0");
 			String lineEnding = VERBOSE ? "\n" : "\r";
 			for (AlignmentNode alignmentNode : alignmentNodes) {
-				for (int alignmentIndex = 0; alignmentIndex < alignmentNode.count; alignmentIndex++) {
-					System.out.print("Evaluating alignment " + (++i) + " / " + total + lineEnding);
+				for (BigInteger alignmentIndex = new BigInteger("0"); alignmentIndex.compareTo(alignmentNode.count) < 0; alignmentIndex = alignmentIndex.add(new BigInteger("1"))) {
+					i = i.add(new BigInteger("1"));
+					System.out.print("Evaluating alignment " + i + " / " + total + lineEnding);
 
 					List<Integer> alignment = alignmentNode.getAlignment(alignmentIndex);
 
