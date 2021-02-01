@@ -104,7 +104,6 @@ This represents a note. Pitch, on, onVal, offVal, and voice are all integers, re
  * `Tatum time`
 This represents a tatum pulse at the given time (an integer, in milliseconds).
 
-
  * `Hierarchy bpb,sbpb tpsb a=al [time]`
 This represents the metrical hierarchy, where bpb, sbpb, tpsb, and al are all integers representing the beats per bar, sub beats per beat, tatums per sub beat, and anacrusis length (in tatums) respectively. The time is in milliseconds, and assumed to be 0 if not given.
 Beginning a new hierarchy on a non-downbeat, while not recommended, is supported. The previous downbeat, and start to the most recent beat and sub beat are saved, and the tatum position is updated as in the new bar. Thus, 1 beat of a 2/4 bar, followed by 3 beats of a 4/4 bar with a 3 beat anacrusis, is equivalent to a single 4/4 bar.
@@ -117,6 +116,11 @@ Representing a chord, where time is the start time of the chord, in milliseconds
 
 For any duplicate times, only the last given chord, key, or hierarchy are saved. Duplicate tatums are ignored.
 
+
+## Python Version
+Big thanks to @lucasmpaim for his work porting MV2H to python [here](https://github.com/lucasmpaim/pyMV2H).
+
+NOTE: The java version of MV2H should always be considered the canonical, "correct" version, and should be used for final evaluation of a system. However, I have no reason to believe that the python code has any problems with it, and we are working on writing tests to confirm this (see [this issue](https://github.com/apmcleod/MV2H/issues/10)).
 
 ## Version History
 - [v2.2](https://github.com/apmcleod/MV2H/releases/tag/v2.2) added the ability to tune the insertion/deletion penalty during DTW alignment, fixed a bug with time signatures with small denominators (e.g. 2 or 1), and sped up the DTW process significantly.
