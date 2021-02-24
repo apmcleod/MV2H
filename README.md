@@ -120,6 +120,8 @@ For any duplicate times, only the last given chord, key, or hierarchy are saved.
 ## Python Version
 Big thanks to @lucasmpaim for his work porting MV2H to python [here](https://github.com/lucasmpaim/pyMV2H).
 
+The python version does run significantly slower at the moment, particularly on long pieces with inaccuracte transcriptions.
+
 NOTE: The java version of MV2H should always be considered the canonical, "correct" version, and should be used for final evaluation of a system. However, I have no reason to believe that the python code has any problems with it, and we are working on writing tests to confirm this (see [this issue](https://github.com/apmcleod/MV2H/issues/10)).
 
 ## Version History
