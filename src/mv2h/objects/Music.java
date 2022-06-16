@@ -14,6 +14,7 @@ import mv2h.objects.harmony.Chord;
 import mv2h.objects.harmony.ChordProgression;
 import mv2h.objects.harmony.Key;
 import mv2h.objects.harmony.KeyProgression;
+import mv2h.objects.meter.Grouping;
 import mv2h.objects.meter.Hierarchy;
 import mv2h.objects.meter.Meter;
 import mv2h.objects.meter.Tatum;
@@ -93,6 +94,8 @@ public class Music {
 		for (Voice voice : voices) {
 			voice.createConnections();
 		}
+
+		this.meter.createGroupings();
 	}
 
 	/**
@@ -392,12 +395,17 @@ public class Music {
 
 		// Convert the metrical structure times
 		Meter newMeter = new Meter(Aligner.convertTime(0, gt, this, alignment, alignedTimes));
+		List<Grouping> newGroupings = newMeter.getGroupings();
 		for (Hierarchy h : meter.getHierarchies()) {
 			newMeter.addHierarchy(new Hierarchy(h.beatsPerBar, h.subBeatsPerBeat, h.tatumsPerSubBeat, h.anacrusisLengthTatums,
 					Aligner.convertTime(h.time, gt, this, alignment, alignedTimes)));
 		}
 		for (Tatum tatum : meter.getTatums()) {
 			newMeter.addTatum(new Tatum(Aligner.convertTime(tatum.time, gt, this, alignment, alignedTimes)));
+		}
+		for (Grouping grouping : meter.getGroupings()) {
+			newGroupings.add(new Grouping(Aligner.convertTime(grouping.startTime, gt, this, alignment, alignedTimes),
+					Aligner.convertTime(grouping.endTime, gt, this, alignment, alignedTimes)));
 		}
 
 		// Convert the key change times

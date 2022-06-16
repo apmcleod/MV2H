@@ -247,19 +247,41 @@ public class Aligner {
 		double transcriptionIndex = -1;
 		List<List<Note>> transcriptionNotes = transcription.getNoteLists();
 
-		// Find the correct transcription anchor index to start with
-		for (int i = 0; i < transcriptionNotes.size(); i++) {
+		// Find the correct transcription anchor index to start with using binary search
+		int first = 0;
+		int last = transcriptionNotes.size();
+		int searchedTime = 0;
+		while (first < last) {
+			int mid = (last + first) / 2;
+			searchedTime = transcriptionNotes.get(mid).get(0).valueOnsetTime;
 
-			// Time matches an anchor exactly
-			if (transcriptionNotes.get(i).get(0).valueOnsetTime == time) {
-				transcriptionIndex = i;
+			if (searchedTime > time) {
+				last = mid - 1;
+			} else if (searchedTime == time) {
+				transcriptionIndex = mid;
 				break;
+			} else {
+				first = mid + 1;
 			}
+		}
 
-			// This anchor is past the time
-			if (transcriptionNotes.get(i).get(0).valueOnsetTime > time) {
-				transcriptionIndex = i - 0.5;
-				break;
+		if (transcriptionIndex == -1) {
+			// No match found yet
+			if (first >= transcriptionNotes.size()) {
+				transcriptionIndex = transcriptionNotes.size();
+			} else {
+				searchedTime = transcriptionNotes.get(first).get(0).valueOnsetTime;
+
+				if (searchedTime == time) {
+					// Time matches an anchor exactly
+					transcriptionIndex = first;
+				} else if (searchedTime > time) {
+					// This anchor is past the time
+					transcriptionIndex = first - 0.5;
+				} else {
+					// This anchor is before the time
+					transcriptionIndex = first + 0.5;
+				}
 			}
 		}
 
