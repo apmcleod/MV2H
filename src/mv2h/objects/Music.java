@@ -165,14 +165,18 @@ public class Music {
 		// A mapping for the ground truth.
 		Map<Note, Note> groundTruthNoteMapping = new HashMap<Note, Note>();
 
-
 		// Multi-pitch accuracy
 		int multiPitchTruePositives = 0;
-		Iterator<Note> transcriptionIterator = transcriptionNotes.iterator();
-		while (transcriptionIterator.hasNext()) {
-			Note transcriptionNote = transcriptionIterator.next();
 
-			Iterator<Note> groundTruthIterator = groundTruthNotes.iterator();
+		// Index to make the search more efficient
+		int startingIndex = 0;
+
+		for (Note transcriptionNote : transcriptionNotes) {
+			// Bounds for a note to match this transcription note in time
+			int earliestOnset = transcriptionNote.onsetTime - Main.ONSET_DELTA;
+			int latestOnset = transcriptionNote.onsetTime + Main.ONSET_DELTA;
+
+			Iterator<Note> groundTruthIterator = groundTruthNotes.subList(startingIndex, groundTruthNotes.size()).iterator();
 			while (groundTruthIterator.hasNext()) {
 				Note groundTruthNote = groundTruthIterator.next();
 
@@ -186,12 +190,20 @@ public class Music {
 					groundTruthVoices.get(groundTruthNote.voice).addNote(groundTruthNote);
 
 					groundTruthIterator.remove();
-					transcriptionIterator.remove();
+					break;
+				}
+
+				// Speed optimization
+				if (groundTruthNote.onsetTime < earliestOnset) {
+					// This note will never again match a transcription note.
+					startingIndex++;
+				} else if (groundTruthNote.onsetTime > latestOnset) {
+					// We have gone too far. No further GT notes will match.
 					break;
 				}
 			}
 		}
-		int multiPitchFalsePositives = transcriptionNotes.size();
+		int multiPitchFalsePositives = transcriptionNotes.size() - groundTruthNoteMapping.size();
 		int multiPitchFalseNegatives = groundTruthNotes.size();
 
 		double multiPitchF1 = Main.getF1(multiPitchTruePositives, multiPitchFalsePositives, multiPitchFalseNegatives);
