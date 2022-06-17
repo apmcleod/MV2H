@@ -70,29 +70,29 @@ To get the averages of many MV2H evaluations:
 ## Examples
 The examples directory contains two example transcriptions of an ground truth. To perform evaluation, run the following commands and you should get the results shown:
 
- * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`
-Multi-pitch: 0.9302325581395349
-Voice: 0.8125
-Meter: 0.7368421052631577
-Value: 0.9642857142857143
-Harmony: 1.0
+ * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`  
+Multi-pitch: 0.9302325581395349  
+Voice: 0.8125  
+Meter: 0.7368421052631577  
+Value: 0.9642857142857143  
+Harmony: 1.0  
 MV2H: 0.8887720755376813
 
- * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`
-Multi-pitch: 0.7727272727272727
-Voice: 1.0
-Meter: 1.0
-Value: 1.0
-Harmony: 0.5
+ * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`  
+Multi-pitch: 0.7727272727272727  
+Voice: 1.0  
+Meter: 1.0  
+Value: 1.0  
+Harmony: 0.5  
 MV2H: 0.8545454545454545
 
- * `java -cp bin mv2h.Main -F <examples/FullOut.txt`
-Multi-pitch: mean=0.8514799154334038 stdev=0.0787526427061301
-Voice: mean=0.90625 stdev=0.09375
-Meter: mean=0.8684210526315789 stdev=0.13157894736842105
-Value: mean=0.9821428571428572 stdev=0.017857142857137718
-Harmony: mean=0.75 stdev=0.25
-MV2H: mean=0.8716587650415679 stdev=0.017113310496113164
+ * `java -cp bin mv2h.Main -F <examples/FullOut.txt`  
+Multi-pitch: mean=0.8514799154334038 stdev=0.0787526427061301  
+Voice: mean=0.90625 stdev=0.09375  
+Meter: mean=0.8684210526315789 stdev=0.13157894736842105  
+Value: mean=0.9821428571428572 stdev=0.017857142857137718  
+Harmony: mean=0.75 stdev=0.25  
+MV2H: mean=0.8716587650415679 stdev=0.017113310496113164  
 
 
 ## File Format

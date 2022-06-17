@@ -14,6 +14,7 @@ import mv2h.objects.harmony.Chord;
 import mv2h.objects.harmony.ChordProgression;
 import mv2h.objects.harmony.Key;
 import mv2h.objects.harmony.KeyProgression;
+import mv2h.objects.meter.Grouping;
 import mv2h.objects.meter.Hierarchy;
 import mv2h.objects.meter.Meter;
 import mv2h.objects.meter.Tatum;
@@ -93,6 +94,8 @@ public class Music {
 		for (Voice voice : voices) {
 			voice.createConnections();
 		}
+
+		this.meter.createGroupings();
 	}
 
 	/**
@@ -165,14 +168,18 @@ public class Music {
 		// A mapping for the ground truth.
 		Map<Note, Note> groundTruthNoteMapping = new HashMap<Note, Note>();
 
-
 		// Multi-pitch accuracy
 		int multiPitchTruePositives = 0;
-		Iterator<Note> transcriptionIterator = transcriptionNotes.iterator();
-		while (transcriptionIterator.hasNext()) {
-			Note transcriptionNote = transcriptionIterator.next();
 
-			Iterator<Note> groundTruthIterator = groundTruthNotes.iterator();
+		// Index to make the search more efficient
+		int startingIndex = 0;
+
+		for (Note transcriptionNote : transcriptionNotes) {
+			// Bounds for a note to match this transcription note in time
+			int earliestOnset = transcriptionNote.onsetTime - Main.ONSET_DELTA;
+			int latestOnset = transcriptionNote.onsetTime + Main.ONSET_DELTA;
+
+			Iterator<Note> groundTruthIterator = groundTruthNotes.subList(startingIndex, groundTruthNotes.size()).iterator();
 			while (groundTruthIterator.hasNext()) {
 				Note groundTruthNote = groundTruthIterator.next();
 
@@ -186,12 +193,20 @@ public class Music {
 					groundTruthVoices.get(groundTruthNote.voice).addNote(groundTruthNote);
 
 					groundTruthIterator.remove();
-					transcriptionIterator.remove();
+					break;
+				}
+
+				// Speed optimization
+				if (groundTruthNote.onsetTime < earliestOnset) {
+					// This note will never again match a transcription note.
+					startingIndex++;
+				} else if (groundTruthNote.onsetTime > latestOnset) {
+					// We have gone too far. No further GT notes will match.
 					break;
 				}
 			}
 		}
-		int multiPitchFalsePositives = transcriptionNotes.size();
+		int multiPitchFalsePositives = transcriptionNotes.size() - groundTruthNoteMapping.size();
 		int multiPitchFalseNegatives = groundTruthNotes.size();
 
 		double multiPitchF1 = Main.getF1(multiPitchTruePositives, multiPitchFalsePositives, multiPitchFalseNegatives);
@@ -380,12 +395,17 @@ public class Music {
 
 		// Convert the metrical structure times
 		Meter newMeter = new Meter(Aligner.convertTime(0, gt, this, alignment, alignedTimes));
+		List<Grouping> newGroupings = newMeter.getGroupings();
 		for (Hierarchy h : meter.getHierarchies()) {
 			newMeter.addHierarchy(new Hierarchy(h.beatsPerBar, h.subBeatsPerBeat, h.tatumsPerSubBeat, h.anacrusisLengthTatums,
 					Aligner.convertTime(h.time, gt, this, alignment, alignedTimes)));
 		}
 		for (Tatum tatum : meter.getTatums()) {
 			newMeter.addTatum(new Tatum(Aligner.convertTime(tatum.time, gt, this, alignment, alignedTimes)));
+		}
+		for (Grouping grouping : meter.getGroupings()) {
+			newGroupings.add(new Grouping(Aligner.convertTime(grouping.startTime, gt, this, alignment, alignedTimes),
+					Aligner.convertTime(grouping.endTime, gt, this, alignment, alignedTimes)));
 		}
 
 		// Convert the key change times
