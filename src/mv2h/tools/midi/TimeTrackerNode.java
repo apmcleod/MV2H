@@ -241,7 +241,7 @@ public class TimeTrackerNode {
 		}
 		
 		// Length of remainder time in sub beats
-		propFinished = ((time - currentTime) % millisPerSubBeat) / millisPerSubBeat;
+		propFinished = 1 - ((currentTime - time) % millisPerSubBeat) / millisPerSubBeat;
 		return propFinished == 0 ? 1.0 : propFinished;
 	}
 }
