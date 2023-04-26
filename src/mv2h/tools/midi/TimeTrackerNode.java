@@ -234,10 +234,14 @@ public class TimeTrackerNode {
 		double millisPerSubBeat = getMillisPerSubBeat();
 		
 		// Correct start time for propFinished
-		double prevTime = startTime - millisPerSubBeat * propFinished;
+		double currentTime = startTime - millisPerSubBeat * propFinished + millisPerSubBeat;
+		
+		while (currentTime <= time) {
+			currentTime += millisPerSubBeat;
+		}
 		
 		// Length of remainder time in sub beats
-		propFinished = ((time - prevTime) % millisPerSubBeat) / millisPerSubBeat;
+		propFinished = 1 - ((currentTime - time) % millisPerSubBeat) / millisPerSubBeat;
 		return propFinished == 0 ? 1.0 : propFinished;
 	}
 }
