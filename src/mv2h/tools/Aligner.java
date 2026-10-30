@@ -1,5 +1,5 @@
 package mv2h.tools;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +20,20 @@ import mv2h.objects.Note;
  * @author Andrew McLeod
  */
 public class Aligner {
+
+	/**
+	 * Get the alignment of the given ground truth and transcription from the specified match file.
+	 *
+	 * @param groundTruth The ground truth music.
+	 * @param transcription The transcription music.
+	 * @param MATCH_FILE The match file containing the alignment information.
+	 *
+	 * @return A List of alignment nodes representing the alignment from the match file.
+	 */
+	public static List<AlignmentNode> getAlignmentsFromMatchFile(Music groundTruth, Music transcription, File MATCH_FILE) {
+		// TODO
+		return new ArrayList<AlignmentNode>();
+	}
 
 	/**
 	 * Get all possible alignments of the given ground truth and transcription.
