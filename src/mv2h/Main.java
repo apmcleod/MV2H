@@ -230,12 +230,12 @@ public class Main {
 
 			List<AlignmentNode> alignmentNodes;
 			if (MATCH_FILE == null) {
-				List<AlignmentNode> alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
+				alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
 			} else {
 				if (VERBOSE) {
 					System.out.println("Using alignment from Match file.");
 				}
-				List<AlignmentNode> alignmentNodes = Aligner.getAlignmentFromMatchFile(groundTruth, transcription, MATCH_FILE);
+				alignmentNodes = Aligner.getAlignmentFromMatchFile(groundTruth, transcription, new Scanner(MATCH_FILE));
 			}
 
 
