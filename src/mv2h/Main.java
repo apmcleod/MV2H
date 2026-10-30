@@ -235,7 +235,7 @@ public class Main {
 				if (VERBOSE) {
 					System.out.println("Using alignment from Match file.");
 				}
-				List<AlignmentNode> alignmentNodes = Aligner.getAlignmentsFromMatchFile(groundTruth, transcription, MATCH_FILE);
+				List<AlignmentNode> alignmentNodes = Aligner.getAlignmentFromMatchFile(groundTruth, transcription, MATCH_FILE);
 			}
 
 

@@ -44,6 +44,27 @@ To solve this, I recommend running another symbolic music alignment model as a p
 Once this `*.match` file has been created, add it as a parameter to the java command: `-m FILE`. The script will now skip its alignment,
 instead using that from the generated `*.match` file.
 
+Here is some example python code that uses Parangonar create a match file from ground truth and transcription MIDI files:
+
+```
+import parangonar as pa
+import partitura as pt
+
+gt = pt.load_score_midi(score_path)
+transcription = pt.load_performance_midi(transcription_path)
+
+gt = pt.load_score_midi(GT_MIDI_PATH)
+trans = pt.load_performance_midi(TRANS_MIDI_PATH)
+
+gt_notes = gt.note_array()
+trans_notes = trans.note_array()
+
+matcher = pa.AutomaticNoteMatcher()
+alignment = matcher(gt_notes, trans_notes, verbose_time=True)
+match_file = pt.io.exportmatch.save_match(alignment, trans, gt)
+match_file.write(MATCH_FILE)
+```
+
 ### Aligned Data
 To evaluate a time-aligned transcription and ground truth:
 * `java -cp bin mv2h.Main -g gt.txt -t transcription.txt`

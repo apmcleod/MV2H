@@ -26,11 +26,13 @@ public class Aligner {
 	 *
 	 * @param groundTruth The ground truth music.
 	 * @param transcription The transcription music.
-	 * @param MATCH_FILE The match file containing the alignment information.
+	 * @param matchFile The match file containing the alignment information.
 	 *
 	 * @return A List of alignment nodes representing the alignment from the match file.
+	 * That is, a list containing, for each ground truth note, the index of the transcription
+	 * note to which it is aligned, or -1 if it was not aligned with any transcription note.
 	 */
-	public static List<AlignmentNode> getAlignmentsFromMatchFile(Music groundTruth, Music transcription, File MATCH_FILE) {
+	public static List<AlignmentNode> getAlignmentFromMatchFile(Music groundTruth, Music transcription, File matchFile) {
 		// TODO
 		return new ArrayList<AlignmentNode>();
 	}
