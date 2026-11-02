@@ -1,10 +1,13 @@
 package mv2h.tools;
-
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import mv2h.Main;
 import mv2h.objects.Music;
@@ -20,6 +23,123 @@ import mv2h.objects.Note;
  * @author Andrew McLeod
  */
 public class Aligner {
+
+	/**
+	 * Get the alignment of the given ground truth and transcription from the specified match file.
+	 *
+	 * @param groundTruth The ground truth music.
+	 * @param transcription The transcription music.
+	 * @param matchInput The match input stream containing the alignment information.
+	 *
+	 * @return A List of alignment nodes representing the alignment from the match file.
+	 * That is, a list containing, for each ground truth note, the index of the transcription
+	 * note to which it is aligned, or -1 if it was not aligned with any transcription note.
+	 * @throws IOException If there was an error in reading or parsing the match stream.
+	 */
+	public static List<AlignmentNode> getAlignmentFromMatchFile(Music groundTruth, Music transcription, Scanner matchInput) throws IOException {
+		ArrayList<String> gtNoteStrings = new ArrayList<String>();
+		ArrayList<String> transNoteStrings = new ArrayList<String>();
+
+		while (matchInput.hasNextLine()) {
+			String line = matchInput.nextLine();
+
+			if (!line.startsWith("snote") && !line.startsWith("insertion")) {
+				continue;
+			}
+
+			// Here we have a note alignment.
+			String[] notes = line.split("-");
+			gtNoteStrings.add(notes[0]);
+			transNoteStrings.add(notes[1]);
+		}
+
+		// Get a sorted list of the unique times in the ground truth notes.
+		TreeSet<Double> gtNoteTimeSet = new TreeSet<Double>();
+		for (String gtNoteString : gtNoteStrings) {
+			if (gtNoteString.startsWith("snote")) {
+				gtNoteTimeSet.add(getTimeFromSNote(gtNoteString));
+			}
+		}
+		ArrayList<Double> gtNoteTimes = new ArrayList<Double>(gtNoteTimeSet);
+
+		// Get a sorted list of the unique times in the transcription notes.
+		TreeSet<Integer> transNoteTimeSet = new TreeSet<Integer>();
+		for (String transNoteString : transNoteStrings) {
+			if (transNoteString.startsWith("note")) {
+				transNoteTimeSet.add(getTimeFromNote(transNoteString));
+			}
+		}
+		ArrayList<Integer> transNoteTimes = new ArrayList<Integer>(transNoteTimeSet);
+
+		// Calculate the alignment based on the timings.
+		ArrayList<Integer> alignments = new ArrayList<Integer>(gtNoteTimes.size());
+		for (int i = 0; i < gtNoteTimes.size(); i++) {
+			alignments.add(-1);
+		}
+
+		for (int i = 0; i < gtNoteStrings.size(); i++) {
+			String gtNoteString = gtNoteStrings.get(i);
+			String transNoteString = transNoteStrings.get(i);
+
+			if (!gtNoteString.startsWith("snote")) {
+				// Unaligned transcription note -- skip it
+				continue;
+			}
+
+			if (!transNoteString.startsWith("note")) {
+				// Unaligned ground truth note -- skip it (we already have -1 in the alignments)
+				continue;
+			}
+
+			// Here both the snote and the note exist.
+			// Find the index of the ground truth time in the sorted list of ground truth times.
+			int gtIndex = Collections.binarySearch(gtNoteTimes, getTimeFromSNote(gtNoteString));
+			int transIndex = Collections.binarySearch(transNoteTimes, getTimeFromNote(transNoteString));
+			alignments.set(gtIndex, transIndex);
+		}
+
+		// At this point, the alignments list contains the index of the transcription note for each ground truth note, or -1 if unaligned.
+		AlignmentNode currentNode = null;
+		for (Integer alignmentIndex : alignments) {
+			ArrayList<AlignmentNode> prevList = new ArrayList<AlignmentNode>();
+			if (currentNode != null) {
+				prevList.add(currentNode);
+			}
+
+			currentNode = new AlignmentNode(prevList, alignmentIndex);
+		}
+
+		ArrayList<AlignmentNode> alignment = new ArrayList<AlignmentNode>();
+		if (currentNode != null) {
+			alignment.add(currentNode);
+		}
+		return alignment;
+	}
+
+	/**
+	 * Get the time from an "snote" string.
+	 * Extracts the time from the onset_in_beats field of the "snote" string,
+	 * which is the eighth element when split on comma.
+	 *
+	 * @param sNoteString The "snote" string to extract the time from.
+	 * @return The time of the "snote" as a Double.
+	 */
+	private static double getTimeFromSNote(String sNoteString) {
+		String onsetInBeats = sNoteString.split(",")[7];
+		return Double.parseDouble(onsetInBeats);
+	}
+
+	/**
+	 * Get the time from a "note" string.
+	 * Extracts the time from the "note" string, which is the third element when split on comma.
+	 *
+	 * @param noteString The "note" string to extract the time from.
+	 * @return The time of the "note" as an integer.
+	 */
+	private static int getTimeFromNote(String noteString) {
+		String time = noteString.split(",")[2];
+		return Integer.parseInt(time);
+	}
 
 	/**
 	 * Get all possible alignments of the given ground truth and transcription.

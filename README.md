@@ -36,6 +36,35 @@ _NOTE: You should use the same value throughout your whole evaluation for a fair
 * `-v`: Use verbose printing. With `-a`, this will print the evaluation score for each alignment.
 With `-A`, this will also print each alignment itself.
 
+#### Using a pre-computed alignment
+The naive DTW alignment implementation here can return a very large number of alignments (see this [issue](https://github.com/apmcleod/MV2H/issues/13)).
+To solve this, I recommend running another symbolic music alignment model as a preprocessing step. A good one is
+[Parangonar](https://github.com/sildater/parangonar), which outputs its alignments in the [match file format](https://cpjku.github.io/matchfile/).
+
+Once this `*.match` file has been created, add it as a parameter to the java command: `-m FILE`. The script will now skip its alignment,
+instead using that from the generated `*.match` file.
+
+Here is some example python code that uses Parangonar create a match file from ground truth and transcription MIDI files:
+
+```
+import parangonar as pa
+import partitura as pt
+
+gt = pt.load_score_midi(score_path)
+transcription = pt.load_performance_midi(transcription_path)
+
+gt = pt.load_score_midi(GT_MIDI_PATH)
+trans = pt.load_performance_midi(TRANS_MIDI_PATH)
+
+gt_notes = gt.note_array()
+trans_notes = trans.note_array()
+
+matcher = pa.AutomaticNoteMatcher()
+alignment = matcher(gt_notes, trans_notes, verbose_time=True)
+match_file = pt.io.exportmatch.save_match(alignment, trans, gt)
+match_file.write(MATCH_FILE)
+```
+
 ### Aligned Data
 To evaluate a time-aligned transcription and ground truth:
 * `java -cp bin mv2h.Main -g gt.txt -t transcription.txt`
@@ -52,7 +81,7 @@ You can also perform the process manually by first converting the MusicXML files
 
 #### MIDI
 1. Convert a MIDI file into the MV2H format:
-`java -cp bin mv2h.tools.Converter -m -i gt.mid -o gt_converted.txt`
+`java -cp bin mv2h.tools.Converter -i gt.mid -o gt_converted.txt`
 `-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats, in case it is not aligned correctly in the MIDI.
 Different parsed voices can be generated using `--channel` or `--track`. Default uses both.
 
@@ -70,29 +99,29 @@ To get the averages of many MV2H evaluations:
 ## Examples
 The examples directory contains two example transcriptions of an ground truth. To perform evaluation, run the following commands and you should get the results shown:
 
- * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`  
-Multi-pitch: 0.9302325581395349  
-Voice: 0.8125  
-Meter: 0.7368421052631577  
-Value: 0.9642857142857143  
-Harmony: 1.0  
+ * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription1.txt`
+Multi-pitch: 0.9302325581395349
+Voice: 0.8125
+Meter: 0.7368421052631577
+Value: 0.9642857142857143
+Harmony: 1.0
 MV2H: 0.8887720755376813
 
- * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`  
-Multi-pitch: 0.7727272727272727  
-Voice: 1.0  
-Meter: 1.0  
-Value: 1.0  
-Harmony: 0.5  
+ * `java -cp bin mv2h.Main -g examples/GroundTruth.txt -t examples/Transcription2.txt`
+Multi-pitch: 0.7727272727272727
+Voice: 1.0
+Meter: 1.0
+Value: 1.0
+Harmony: 0.5
 MV2H: 0.8545454545454545
 
- * `java -cp bin mv2h.Main -F <examples/FullOut.txt`  
-Multi-pitch: mean=0.8514799154334038 stdev=0.0787526427061301  
-Voice: mean=0.90625 stdev=0.09375  
-Meter: mean=0.8684210526315789 stdev=0.13157894736842105  
-Value: mean=0.9821428571428572 stdev=0.017857142857137718  
-Harmony: mean=0.75 stdev=0.25  
-MV2H: mean=0.8716587650415679 stdev=0.017113310496113164  
+ * `java -cp bin mv2h.Main -F <examples/FullOut.txt`
+Multi-pitch: mean=0.8514799154334038 stdev=0.0787526427061301
+Voice: mean=0.90625 stdev=0.09375
+Meter: mean=0.8684210526315789 stdev=0.13157894736842105
+Value: mean=0.9821428571428572 stdev=0.017857142857137718
+Harmony: mean=0.75 stdev=0.25
+MV2H: mean=0.8716587650415679 stdev=0.017113310496113164
 
 
 ## File Format

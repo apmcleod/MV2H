@@ -62,6 +62,12 @@ public class Main {
 	private static boolean PRINT_ALIGNMENT = false;
 
 	/**
+	 * The match file used to inform the alignment.
+	 * Can be set with the <code>-m</code> flag.
+	 */
+	private static File MATCH_FILE = null;
+
+	/**
 	 * The penalty assigned for insertion and deletion errors when performing alignment.
 	 * The default value of <code>1</code> leads to a reasonably fast, but not exhaustive
 	 * search through alignments. Can be set with the <code>-p</code> flag.
@@ -83,6 +89,7 @@ public class Main {
 	 * <li><code>-a</code> = Perform alignment.</li>
 	 * <li><code>-A</code> = Perform and print alignment.</li>
 	 * <li><code>-p DOUBLE</code> = Set the DTW insertion and deletion penalty.</li>
+	 * <li><code>-m FILE</code> = Use the given FILE (in match format) to inform the alignment.</li>
 	 * </ul>
 	 * <br>
 	 * 2. Get the means and standard deviations of many outputs of this program
@@ -135,6 +142,17 @@ public class Main {
 								NON_ALIGNMENT_PENALTY = Double.parseDouble(args[i]);
 							} catch (NumberFormatException e) {
 								argumentError("Non-alignment penalty must be a decimal value. Given: " + args[i]);
+							}
+							break;
+
+						case 'm':
+							i++;
+							if (args.length <= i) {
+								argumentError("No match file given with -m.");
+							}
+							MATCH_FILE = new File(args[i]);
+							if (!MATCH_FILE.exists()) {
+								argumentError("Match file " + MATCH_FILE + " does not exist.");
 							}
 							break;
 
@@ -210,7 +228,17 @@ public class Main {
 			MV2H best = new MV2H(0, 0, 0, 0, 0);
 			List<Integer> bestAlignment = new ArrayList<Integer>();
 
-			List<AlignmentNode> alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
+			List<AlignmentNode> alignmentNodes;
+			if (MATCH_FILE == null) {
+				alignmentNodes = Aligner.getPossibleAlignments(groundTruth, transcription);
+			} else {
+				if (VERBOSE) {
+					System.out.println("Using alignment from Match file.");
+				}
+				alignmentNodes = Aligner.getAlignmentFromMatchFile(groundTruth, transcription, new Scanner(MATCH_FILE));
+			}
+
+
 			BigInteger total = new BigInteger("0");
 			for (AlignmentNode alignmentNode : alignmentNodes) {
 				total = total.add(alignmentNode.count);
@@ -437,6 +465,7 @@ public class Main {
 
 		sb.append("-a = Perform DTW alignment to evaluate non-aligned transcriptions.\n");
 		sb.append("-A = Perform and print the DTW alignment.\n");
+		sb.append("-m FILE = Use the given FILE (in match format) to inform the alignment.\n");
 
 		sb.append("-g FILE = Use the given FILE as the ground truth (defaults to std in).\n");
 		sb.append("-t FILE = Use the given FILE as the transcription (defaults to std in).\n");
