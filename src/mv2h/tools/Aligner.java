@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.swing.GroupLayout.Alignment;
-
 import java.util.TreeSet;
 
 import mv2h.Main;
@@ -57,13 +54,13 @@ public class Aligner {
 		}
 
 		// Get a sorted list of the unique times in the ground truth notes.
-		TreeSet<Integer> gtNoteTimeSet = new TreeSet<Integer>();
+		TreeSet<Double> gtNoteTimeSet = new TreeSet<Double>();
 		for (String gtNoteString : gtNoteStrings) {
 			if (gtNoteString.startsWith("snote")) {
 				gtNoteTimeSet.add(getTimeFromSNote(gtNoteString));
 			}
 		}
-		ArrayList<Integer> gtNoteTimes = new ArrayList<Integer>(gtNoteTimeSet);
+		ArrayList<Double> gtNoteTimes = new ArrayList<Double>(gtNoteTimeSet);
 
 		// Get a sorted list of the unique times in the transcription notes.
 		TreeSet<Integer> transNoteTimeSet = new TreeSet<Integer>();
@@ -76,7 +73,7 @@ public class Aligner {
 
 		// Calculate the alignment based on the timings.
 		ArrayList<Integer> alignments = new ArrayList<Integer>(gtNoteTimes.size());
-		for (int i = 0; i < alignments.size(); i++) {
+		for (int i = 0; i < gtNoteTimes.size(); i++) {
 			alignments.add(-1);
 		}
 
@@ -121,17 +118,15 @@ public class Aligner {
 
 	/**
 	 * Get the time from an "snote" string.
-	 * Extracts the time from the "snote" string, which is in the format "bar:beat" as the fourth element when split on comma.
-	 * The integer conversion multiplies the bar by 10 and adds the beat to get a single integer representing the time.
+	 * Extracts the time from the onset_in_beats field of the "snote" string,
+	 * which is the eighth element when split on comma.
 	 *
 	 * @param sNoteString The "snote" string to extract the time from.
-	 * @return The time of the "snote" as an integer.
+	 * @return The time of the "snote" as a Double.
 	 */
-	private static int getTimeFromSNote(String sNoteString) {
-		String barAndBeat = sNoteString.split(",")[4];
-		String[] barAndBeatParts = barAndBeat.split(":");
-
-		return Integer.parseInt(barAndBeatParts[0]) * 10 + Integer.parseInt(barAndBeatParts[1]);
+	private static double getTimeFromSNote(String sNoteString) {
+		String onsetInBeats = sNoteString.split(",")[7];
+		return Double.parseDouble(onsetInBeats);
 	}
 
 	/**

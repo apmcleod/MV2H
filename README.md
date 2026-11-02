@@ -81,7 +81,7 @@ You can also perform the process manually by first converting the MusicXML files
 
 #### MIDI
 1. Convert a MIDI file into the MV2H format:
-`java -cp bin mv2h.tools.Converter -m -i gt.mid -o gt_converted.txt`
+`java -cp bin mv2h.tools.Converter -i gt.mid -o gt_converted.txt`
 `-a INT` can be used to set the anacrusis (pick-up bar) length to INT sub beats, in case it is not aligned correctly in the MIDI.
 Different parsed voices can be generated using `--channel` or `--track`. Default uses both.
 
